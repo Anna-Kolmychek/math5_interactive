@@ -6,180 +6,26 @@
   <title>Узел 4 · Дроби на числовой прямой</title>
   <link rel="stylesheet" href="../shared.css">
   <style>
-
-    body { background: #F5F0E8; min-height: 100vh; color: #1a1a1a; }
-
-    .col {
-      width: 100%; max-width: 960px; margin: 0 auto;
-      padding-left: 16px; padding-right: 16px;
-    }
-    @media (min-width: 600px) {
-      .col { max-width: none; width: min(100vw - 32px, 640px); }
-    }
-    @media (min-width: 1024px) {
-      .col { width: 960px; }
-    }
-
-    /* Топбар */
-    .topbar {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(245,240,232,0.97);
-      border-bottom: 1.5px solid #E0D8CC;
-      padding: 10px 16px;
-    }
-    .topbar-inner {
-      width: 100%; max-width: 960px; margin: 0 auto;
-      display: flex; align-items: center; gap: 10px;
-    }
-    @media (min-width: 600px) {
-      .topbar-inner { max-width: none; width: min(100vw - 32px, 640px); }
-    }
-    @media (min-width: 1024px) {
-      .topbar-inner { width: 960px; }
-    }
-    
-    
-    
-    
-
-    /* Секции */
-    .page { padding: 20px 0 60px; }
-    .sec { margin-bottom: 28px; }
-    .sec-title { display: flex; align-items: center; gap: 7px; margin-bottom: 12px; }
-    .sec-pill { display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 8px; border-radius: 50px; width: 100%; }
-    .sec-pill-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .sec-pill-text { font-family: var(--font-main); font-size: 15px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
-    .sp-learn { background: #EEEEFF; }
-    .sp-learn .sec-pill-icon { background: #D4D4F8; }
-    .sp-learn .sec-pill-text { color: #0D0C59; }
-    .sp-train { background: #FEFCE8; }
-    .sp-train .sec-pill-icon { background: #FEF08A; }
-    .sp-train .sec-pill-text { color: #713F12; }
-    .sp-err { background: #FFF1EC; }
-    .sp-err .sec-pill-icon { background: #FFD9CC; }
-    .sp-err .sec-pill-text { color: #7C2D12; }
-
-    /* Карточка */
-    .card { background: #fff; border: 1.5px solid #E0D8CC; border-radius: 16px; overflow: hidden; }
-
-    /* Hook */
-    .hook-card { background: #FFF8ED; border: 1.5px solid rgba(196,124,26,0.3); border-radius: 16px; overflow: hidden; }
-    .hook-text-wrap { padding: 16px 18px 18px; border-top: 2px solid #E0D8CC; }
-    
-    
-
     /* Симуляция — числовая прямая */
-    .sim-top { background: #FFF8ED; padding: 16px 16px 12px; border-bottom: 1.5px solid #E0D8CC; }
-    .num-line-wrap {
-      width: 100%; overflow-x: auto; padding-bottom: 4px;
-    }
-    .num-line-svg-wrap {
-      min-width: 280px; min-height: 130px;
-    }
-    .sim-fraction-display {
-      display: flex; align-items: center; justify-content: center; gap: 16px;
-      padding: 10px 0 4px;
-    }
-    .sim-frac-big {
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-    }
-    
-    .frac-l { width: 52px; height: 3px; background: #C47C1A; border-radius: 2px; }
-    
-    .sim-status { text-align: center; font-size: 15px; color: #888; font-style: italic; min-height: 22px; }
-    .sim-pos-badge {
-      display: inline-block; background: #FFF8ED; border: 1.5px solid rgba(196,124,26,0.3);
-      border-radius: 20px; padding: 4px 14px;
-      font-family: var(--font-main); font-size: 15px; font-weight: 700; color: #7A4A0A;
-    }
+    .num-line-wrap { padding: 20px 16px 16px; }
+    .num-line-svg-wrap { width: 100%; overflow-x: auto; }
+    .sim-frac-big { font-family: var(--font-main); font-size: 44px; font-weight: 900; color: #C47C1A; line-height: 1; text-align: center; }
+    .sim-fraction-display { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .sim-pos-badge { display: inline-block; padding: 4px 14px; border-radius: 50px; font-size: 14px; font-weight: 800; }
+    .sim-status { text-align: center; font-size: 15px; color: #888; min-height: 22px; margin-top: 4px; }
 
-    .sliders { padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; }
-    .slider-row { display: flex; flex-direction: column; gap: 6px; }
-    .slider-lbl { display: flex; justify-content: space-between; align-items: center; }
-    
-    
-    input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; background: #E0D8CC; outline: none; cursor: pointer; }
-    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #C47C1A; box-shadow: 0 2px 8px rgba(196,124,26,0.4); cursor: pointer; }
-
-    .presets { padding: 0 16px 14px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-    .preset-btn {
-      background: #FFF8ED; border: 1.5px solid rgba(196,124,26,0.3);
-      border-radius: 50px; padding: 6px 16px;
-      font-family: var(--font-main); font-size: 15px; font-weight: 800; color: #7A4A0A;
-      cursor: pointer; transition: transform 0.12s, background 0.15s; -webkit-tap-highlight-color: transparent;
-    }
-    .preset-btn:active { transform: scale(0.92); background: #F5E8CC; }
-
-    /* Чек-вопрос */
-    .check-wrap { padding: 14px 16px; border-top: 1.5px solid #E0D8CC; }
-    
-    .check-opts { display: flex; flex-direction: column; gap: 8px; }
-    
-    
-    .check-opt.correct { background: #ECFDF5; border-color: #22C55E; color: #166534; pointer-events: none; }
-    .check-opt.wrong   { background: #FEF2F2; border-color: #F87171; color: #991B1B; }
-    .check-opt.dis     { pointer-events: none; opacity: 0.4; }
-    .check-fb { margin-top: 10px; padding: 10px 14px; border-radius: 10px; font-size: 15px; line-height: 1.5; font-weight: 600; display: none; }
-    .check-fb.ok  { background: #ECFDF5; color: #166534; display: block; font-size: 16px; }
-    .check-fb.err { background: #FEF2F2; color: #991B1B; display: block; font-size: 16px; }
-
-    /* Объяснение */
-    .expl-block { padding: 14px 16px; border-bottom: 1.5px solid #E0D8CC; }
-    .expl-block:last-child { border-bottom: none; }
-    
-    
-    .expl-t strong { font-weight: 800; color: #1a1a1a; }
-    .expl-alert { background: #FFF8ED; border-left: 3px solid #C47C1A; border-radius: 0 10px 10px 0; padding: 12px 14px; line-height: 1.6; color: #1a1a1a; }
-    .expl-alert strong { color: #7A4A0A; }
-
-    /* Опорный конспект */
-    
-    
-    
-    .cs-toggle.open .cs-toggle-icon { transform: rotate(180deg); }
-    .cs-body { display: none; margin-top: 8px; }
-    .cs-body.open { display: block; }
-    .cs-block { padding: 14px 16px; border-bottom: 1.5px solid #E0D8CC; }
-    .cs-block:last-child { border-bottom: none; }
-    
-    
-    .cs-text strong { color: #C47C1A; font-weight: 800; }
-    .cs-list { display: flex; flex-direction: column; gap: 7px; }
-    
-    
-    .cs-confusion { display: flex; flex-direction: column; gap: 8px; }
-    .cs-conf-row { background: #F5F0E8; border-radius: 10px; padding: 10px 12px; }
-    
-    
-
-    /* Глоссарий */
-    .gloss-list { display: flex; flex-direction: column; gap: 6px; }
-    .gloss-item { background: #fff; border: 1.5px solid #E0D8CC; border-radius: 12px; overflow: hidden; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-    .gloss-head { padding: 13px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    
-    
-    .gloss-item.open .gloss-arrow { transform: rotate(180deg); }
-    
-    .gloss-item.open .gloss-body { display: block; }
-    .gloss-body em { font-style: normal; font-weight: 700; color: #C47C1A; }
-
-    /* Sort-тренажёр */
+    /* Sort — числовая прямая */
     .sort-wrap { padding: 16px; }
-    .sort-header { font-size: 19px; font-weight: 700; color: #555; margin-bottom: 12px; text-align: center; }
-    .sort-bank {
-      display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
-      min-height: 48px; border: 1.5px dashed #E0D8CC;
-      border-radius: 10px; padding: 10px; margin-bottom: 12px;
-    }
+    .sort-header { font-size: 16px; font-weight: 700; color: #555; margin-bottom: 12px; text-align: center; }
     .sort-slots {
-      display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
-      min-height: 48px; margin-bottom: 10px;
+      display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;
+      margin-bottom: 12px;
     }
     .sort-slot {
-      width: 72px; height: 64px;
+      width: 56px; height: 56px;
       border: 1.5px dashed #C4B89A; border-radius: 10px;
       display: flex; align-items: center; justify-content: center;
-      background: #F5F0E8; font-size: 19px; color: #AAA098;
+      background: #F5F0E8; font-size: 16px; color: #AAA098;
       cursor: pointer; -webkit-tap-highlight-color: transparent;
       flex-shrink: 0; box-sizing: border-box;
     }
@@ -187,7 +33,7 @@
     .sort-chip {
       background: #fff; border: 1.5px solid #E0D8CC;
       border-radius: 10px; padding: 9px 14px;
-      font-size: 19px; font-weight: 600; color: #333;
+      font-size: 16px; font-weight: 600; color: #333;
       cursor: pointer; transition: border-color 0.15s, background 0.15s, transform 0.12s;
       -webkit-tap-highlight-color: transparent;
       display: flex; align-items: center; justify-content: center;
@@ -197,7 +43,8 @@
     .sort-chip.placed { opacity: 0; pointer-events: none; }
     .sort-chip.correct-pos { border-color: #22C55E; background: #ECFDF5; color: #166534; pointer-events: none; }
     .sort-chip.wrong-pos  { border-color: #F87171; background: #FEF2F2; color: #991B1B; }
-    .sort-fb { text-align: center; font-size: 19px; font-weight: 700; color: #AAA098; min-height: 20px; }
+    .sort-bank { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px; }
+    .sort-fb { text-align: center; font-size: 16px; font-weight: 700; color: #AAA098; min-height: 20px; }
     .sort-check-btn {
       display: block; width: 100%; margin-top: 10px;
       padding: 11px; background: #FFF8ED; border: 1.5px solid rgba(196,124,26,0.3);
@@ -205,31 +52,13 @@
       color: #7A4A0A; cursor: pointer; transition: background 0.15s, transform 0.12s;
       -webkit-tap-highlight-color: transparent;
     }
-    .sort-check-btn:active { transform: scale(0.97); background: #F5E8CC; }
     .sort-reset-btn {
       display: none; width: 100%; margin-top: 8px;
       padding: 10px; background: #F5F0E8; border: 1.5px solid #E0D8CC;
-      border-radius: 10px; font-family: var(--font-main); font-size: 16px; font-weight: 700;
-      color: #888; cursor: pointer; -webkit-tap-highlight-color: transparent;
+      border-radius: 10px; font-family: var(--font-main); font-size: 15px; font-weight: 700;
+      color: #888; cursor: pointer;
     }
-    .match2-grid { display: flex; flex-direction: column; gap: 0; max-width: 640px; margin: 0 auto; }
-    .match2-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #E8E0D0; }
-    .match2-row:last-child { border-bottom: none; }
-    .match2-frac {
-      min-width: 56px; text-align: center; font-size: 19px; font-weight: 700;
-      flex-shrink: 0;
-    }
-    .match2-opts { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
-    .match2-btn {
-      background: #F5F0E8; border: 1.5px solid #E0D8CC; border-radius: 8px;
-      padding: 7px 10px; font-family: var(--font-body); font-size: 16px; font-weight: 600;
-      color: #333; cursor: pointer; -webkit-tap-highlight-color: transparent;
-      transition: border-color 0.15s, background 0.15s;
-    }
-    .match2-btn.sel { border-color: #C47C1A; background: #FFF8ED; }
-    .sort-tab-bar {
-      display: flex; gap: 6px; margin-bottom: 14px;
-    }
+    .sort-tab-bar { display: flex; gap: 6px; margin-bottom: 14px; }
     .sort-tab {
       flex: 1; padding: 8px 6px; background: #F5F0E8;
       border: 1.5px solid #E0D8CC; border-radius: 8px;
@@ -240,165 +69,27 @@
     }
     .sort-tab.active { background: #FFF8ED; border-color: #C47C1A; color: #7A4A0A; }
 
-    /* Чтение */
-    
-    
-    .read-text p { margin-bottom: 12px; }
-    .read-text p:last-child { margin-bottom: 0; }
-    .read-qs { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 16px; }
-    
-    .read-opts { display: flex; flex-direction: column; gap: 6px; }
-    
-    .read-opt.correct { background: #ECFDF5; border-color: #22C55E; color: #166534; pointer-events: none; }
-    .read-opt.wrong   { background: #FEF2F2; border-color: #F87171; color: #991B1B; pointer-events: none; }
-    .read-opt.dis     { pointer-events: none; opacity: 0.4; }
-
-    /* Misconceptions */
-    .misc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-    .misc-card {
-      background: #fff; border: 1.5px solid #E0D8CC;
-      border-radius: 14px; overflow: hidden;
-      cursor: pointer; -webkit-tap-highlight-color: transparent;
-      transition: border-color 0.2s, box-shadow 0.2s;
+    /* Match2 */
+    .match2-grid { display: flex; flex-direction: column; gap: 0; max-width: 640px; margin: 0 auto; }
+    .match2-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #E8E0D0; }
+    .match2-row:last-child { border-bottom: none; }
+    .match2-frac {
+      min-width: 56px; text-align: center; font-size: 16px; font-weight: 700;
+      flex-shrink: 0;
     }
-    .misc-card.active { border-color: #C47C1A; box-shadow: 0 2px 14px rgba(196,124,26,0.18); }
+    .match2-opts { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+    .match2-btn {
+      background: #F5F0E8; border: 1.5px solid #E0D8CC; border-radius: 8px;
+      padding: 7px 10px; font-family: var(--font-body); font-size: 16px; font-weight: 600;
+      color: #555; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .match2-btn.sel { border-color: #C47C1A; background: #FFF8ED; }
+
+    /* Misconceptions — заглушки специфичные */
     .misc-ph { width: 100%; aspect-ratio: 3/2; background: #EDE6D8; border: 2px dashed #C4B89A; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px; box-sizing: border-box; }
     .misc-ph-icon { font-size: 20px; opacity: 0.45; }
     .misc-ph-desc { font-size: 11px; color: #8C7A60; font-weight: 600; text-align: center; line-height: 1.4; }
-    
-    .misc-panel { display: none; background: #fff; border: 1.5px solid #E0D8CC; border-radius: 14px; overflow: hidden; }
-    .misc-panel.open { display: block; }
-    .misc-panel-head { background: #FEF2F2; padding: 14px 16px; border-bottom: 1.5px solid #FECACA; display: flex; align-items: center; gap: 10px; }
-    .misc-panel-head-icon { flex-shrink: 0; }
-    
-    .misc-body  { padding: 14px 16px; }
-    
-    
-    
-
-    /* Запомни */
-    .remember-list { display: flex; flex-direction: column; gap: 7px; }
-    .remember-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: #fff; border: 1.5px solid #E0D8CC; border-radius: 10px; }
-    .remember-dot  { width: 7px; height: 7px; border-radius: 50%; background: #C47C1A; flex-shrink: 0; margin-top: 7px; }
-    
-    .remember-text strong { color: #1a1a1a; font-weight: 800; }
-
-    /* Проверь себя */
-    .selfcheck-list { display: flex; flex-direction: column; gap: 7px; }
-    
-    .selfcheck-num  { font-weight: 800; color: #AAA098; margin-right: 6px; }
-
-    /* Квиз */
-    .quiz-prog { display: flex; gap: 6px; margin-bottom: 14px; }
-    .quiz-dot  { flex: 1; height: 4px; border-radius: 2px; background: #E0D8CC; transition: background 0.3s; }
-    .quiz-dot.done    { background: #C47C1A; }
-    .quiz-dot.current { background: rgba(196,124,26,0.38); }
-    .quiz-dot.correct { background: #22C55E; }
-    .quiz-dot.wrong   { background: #F87171; }
-    .quiz-qw  { padding: 16px 16px 10px; }
-    
-    
-    .quiz-opts { padding: 0 16px 14px; display: flex; flex-direction: column; gap: 8px; }
-    
-    
-    .quiz-opt.correct { background: #ECFDF5; border-color: #22C55E; color: #166534; pointer-events: none; }
-    .quiz-opt.wrong   { background: #FEF2F2; border-color: #F87171; color: #991B1B; pointer-events: none; }
-    .quiz-opt.dis     { pointer-events: none; opacity: 0.32; }
-    
-    .quiz-explain.show { display: block; }
-    .quiz-explain.ok  { background: #ECFDF5; color: #166534; }
-    .quiz-explain.err { background: #FEF2F2; color: #991B1B; }
-    
-    
-
-    /* DYK */
-    .dyk-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-    .dyk-card  { background: #fff; border: 1.5px solid #E0D8CC; border-radius: 14px; overflow: hidden; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: border-color 0.2s, box-shadow 0.2s; }
-    .dyk-card.active { border-color: #C47C1A; box-shadow: 0 2px 14px rgba(196,124,26,0.18); }
-    .dyk-card-body { padding: 10px 12px 12px; }
-    
-    .dyk-panel { display: none; background: #fff; border: 1.5px solid #C47C1A; border-radius: 14px; overflow: hidden; margin-bottom: 10px; }
-    .dyk-panel.open { display: block; }
-    .dyk-panel-head { background: #FFF8ED; padding: 14px 16px; border-bottom: 1.5px solid rgba(196,124,26,0.2); }
-
-
-    /* Заглушки */
-    .img-placeholder {
-      width: 100%; background: #EDE6D8; border: 2px dashed #C4B89A;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 8px; color: #8C7A60; font-family: var(--font-main);
-      text-align: center; padding: 20px 16px; box-sizing: border-box;
-    }
-    
-    
-    
-    .img-ph-16-7 { aspect-ratio: 16/7; }
-    .img-ph-3-2  { aspect-ratio: 3/2; }
-    .img-ph-16-6 { aspect-ratio: 16/6; }
-
-    /* Кнопка внизу */
-    .bottom-back { padding: 0 16px 48px; width: 100%; max-width: 960px; margin: 0 auto; }
-    @media (min-width: 600px) { .bottom-back { max-width: none; width: min(100vw - 32px, 640px); } }
-    @media (min-width: 1024px) { .bottom-back { width: 960px; } }
-    
-    
-
-    /* Экран завершения */
-    .finish-ov {
-      position: fixed; inset: 0; background: rgba(245,240,232,0.97);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.4s;
-    }
-    .finish-ov.show { opacity: 1; pointer-events: all; }
-    .finish-card {
-      background: #fff; border: 1.5px solid #E0D8CC;
-      border-radius: 24px; padding: 36px 28px; text-align: center; max-width: 320px; width: 90%;
-      transform: scale(0.75); transition: transform 0.45s cubic-bezier(0.34,1.56,0.64,1);
-    }
-    .finish-ov.show .finish-card { transform: scale(1); }
-    
-    
-    
-    .finish-score strong { color: #16A34A; font-weight: 800; }
-    .finish-btns  { display: flex; flex-direction: column; gap: 8px; }
-    
-    
-    .finish-btn-pri { background: #C47C1A; color: #fff; }
-    .finish-btn-sec { background: #F5F0E8; color: #888; border: 1.5px solid #E0D8CC; }
-
-    /* Масштабирование */
-    @media (min-width: 600px) {
-      .sort-chip     { font-size: clamp(15px, 1.9vw, 18px); }
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-    }
-
-    /* Инлайн-дробь */
-    .frac {
-      display: inline-grid;
-      grid-template-rows: 1fr auto 1fr;
-      align-items: center;
-      text-align: center;
-      vertical-align: middle;
-      margin: 0 2px;
-      line-height: 1;
-    }
-    .frac-n, .frac-d { font-size: 1em; line-height: 1.15; }
-    .frac-bar { border-top: 1.5px solid currentColor; width: 100%; min-width: 0.7em; }
-
   </style>
 </head>
 <body>
@@ -649,20 +340,6 @@
 <script src="../shared.js"></script>
 <script>
 
-function fr(n, d) {
-  return '<span class="frac"><span class="frac-n">' + n + '</span><span class="frac-bar"></span><span class="frac-d">' + d + '</span></span>';
-}
-function fri(n, d) { return ' ' + fr(n, d) + ' '; }
-
-function shuffleArr(arr) {
-  var a = arr.slice(), i, j, t;
-  for (i = a.length - 1; i > 0; i--) {
-    j = Math.floor(Math.random() * (i + 1));
-    t = a[i]; a[i] = a[j]; a[j] = t;
-  }
-  return a;
-}
-
 /* ── Симуляция — числовая прямая ── */
 function buildNumLine(num, den) {
   var wrap = document.getElementById('numLineSvgWrap');
@@ -889,19 +566,6 @@ function initCheck() {
   }
 }
 
-/* ── Опорный конспект ── */
-function toggleCS() {
-  var btn  = document.getElementById('csToggle');
-  var body = document.getElementById('csBody');
-  if (body.className.indexOf('open') >= 0) {
-    body.className = 'cs-body card';
-    btn.className  = 'cs-toggle';
-  } else {
-    body.className = 'cs-body card open';
-    btn.className  = 'cs-toggle open';
-  }
-}
-
 /* ── Глоссарий ── */
 var GLOSSARY = [
   { term: 'Числовая прямая',
@@ -915,25 +579,6 @@ var GLOSSARY = [
   { term: 'Равные дроби',
     def: 'Дроби, соответствующие одной и той же точке на числовой прямой. Пример: <em>' + fr(1,2) + ' = ' + fr(2,4) + ' = ' + fr(3,6) + '</em> — разные записи одного числа.' }
 ];
-
-function initGlossary() {
-  var list = document.getElementById('glossList');
-  list.innerHTML = '';
-  var i;
-  for (i = 0; i < GLOSSARY.length; i++) {
-    (function(item) {
-      var el = document.createElement('div');
-      el.className = 'gloss-item';
-      el.innerHTML = '<div class="gloss-head"><span class="gloss-term">' + item.term + '</span><span class="gloss-arrow">&#9662;</span></div>'
-                   + '<div class="gloss-body">' + item.def + '</div>';
-      el.onclick = function() {
-        if (el.className.indexOf('open') >= 0) { el.className = 'gloss-item'; }
-        else { el.className = 'gloss-item open'; }
-      };
-      list.appendChild(el);
-    })(GLOSSARY[i]);
-  }
-}
 
 /* ── Sort-тренажёр ── */
 var SORT_TASKS = [
@@ -1159,7 +804,7 @@ function sortSlotTap(slot) {
   var fi;
   for (fi = 0; fi < task.chips.length; fi++) {
     if (task.chips[fi].val === sortSelected.val) {
-      slot.innerHTML = '<span style="display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-main);font-size:19px;font-weight:600;color:#333;pointer-events:none">' + task.chips[fi].html + '</span>';
+      slot.innerHTML = '<span style="display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-main);font-size:16px;font-weight:600;color:#333;pointer-events:none">' + task.chips[fi].html + '</span>';
       break;
     }
   }
@@ -1277,6 +922,9 @@ function initReadQuiz() {
 /* ── Misconceptions ── */
 var MISCONCEPTIONS = [
   {
+    imgId: 'node4_img4',
+    imgRatio: '3/2',
+    hasImg: true,
     imgDesc: 'Два отрезка одинаковой длины. Один разделён на 8 равных частей — одна закрашена. Другой разделён на 2 части — одна закрашена. Ребёнок показывает на первый: «здесь цифра 8, значит больше». Стрелка сравнения указывает наоборот.',
     label: '«Большой знаменатель — большая дробь»?',
     wrong: '«У ' + fr(1,8) + ' знаменатель 8, а у ' + fr(1,2) + ' всего 2. Значит ' + fr(1,8) + ' больше»',
@@ -1285,6 +933,9 @@ var MISCONCEPTIONS = [
     hint: 'Знаменатель — это дробитель. Чем больше делишь, тем мельче кусочки.'
   },
   {
+    imgId: 'node4_img5',
+    imgRatio: '3/2',
+    hasImg: true,
     imgDesc: 'Числовая прямая с делениями от 0 до 1. На ней одна точка. Слева от точки подпись «1/2», справа — «2/4». Ребёнок в раздумье смотрит на две подписи и думает, что это разные точки. Стрелка с вопросом указывает на единственную точку на прямой.',
     label: '' + fr(1,2) + ' и ' + fr(2,4) + ' — разные точки?',
     wrong: '«' + fr(1,2) + ' и ' + fr(2,4) + ' — разные дроби, значит разные точки на прямой»',
@@ -1294,59 +945,6 @@ var MISCONCEPTIONS = [
   }
 ];
 
-var miscActive = -1;
-
-function initMisc() {
-  var grid = document.getElementById('miscGrid');
-  grid.innerHTML = '';
-  var i;
-  for (i = 0; i < MISCONCEPTIONS.length; i++) {
-    (function(m, idx) {
-      var card = document.createElement('div');
-      card.className = 'misc-card';
-      var imgSrcs = ['node4_img4.png', 'node4_img5.png'];
-      var imgHtml = '<img src="' + imgSrcs[idx] + '" alt="' + m.imgDesc + '" style="width:100%;aspect-ratio:3/2;object-fit:cover;display:block;">';
-      card.innerHTML = imgHtml + '<div class="misc-card-label">' + m.label + '</div>';
-      card.onclick = function() { miscTap(idx); };
-      grid.appendChild(card);
-    })(MISCONCEPTIONS[i], i);
-  }
-}
-
-function miscTap(idx) {
-  var grid  = document.getElementById('miscGrid');
-  var panel = document.getElementById('miscPanel');
-  var cards = grid.querySelectorAll('.misc-card');
-  var m = MISCONCEPTIONS[idx];
-  var i;
-
-  if (miscActive === idx) {
-    miscActive = -1;
-    for (i = 0; i < cards.length; i++) { cards[i].className = 'misc-card'; }
-    panel.className = 'misc-panel';
-    panel.innerHTML = '';
-    return;
-  }
-
-  miscActive = idx;
-  for (i = 0; i < cards.length; i++) { cards[i].className = 'misc-card'; }
-  cards[idx].className = 'misc-card active';
-
-  panel.className = 'misc-panel open';
-  var iconSVG = '<svg width="22" height="22" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg">'
-    + '<circle cx="11" cy="11" r="11" fill="#EF4444"/>'
-    + '<line x1="7" y1="7" x2="15" y2="15" stroke="white" stroke-width="2.2" stroke-linecap="round"/>'
-    + '<line x1="15" y1="7" x2="7" y2="15" stroke="white" stroke-width="2.2" stroke-linecap="round"/>'
-    + '</svg>';
-  panel.innerHTML = '<div class="misc-panel-head">'
-    + '<div class="misc-panel-head-icon">' + iconSVG + '</div>'
-    + '<div class="misc-wrong">' + m.wrong + '</div></div>'
-    + '<div class="misc-body">'
-    + '<div class="misc-why">' + m.whyWrong + '</div>'
-    + '<div class="misc-correct">' + m.correct + '</div>'
-    + '<div class="misc-hint">&#9989; ' + m.hint + '</div>'
-    + '</div>';
-}
 
 /* ── Запомни ── */
 var REMEMBER = [
@@ -1357,18 +955,6 @@ var REMEMBER = [
   'Между любыми двумя дробями всегда найдётся ещё одна'
 ];
 
-function initRemember() {
-  var list = document.getElementById('rememberList');
-  list.innerHTML = '';
-  var i;
-  for (i = 0; i < REMEMBER.length; i++) {
-    var item = document.createElement('div');
-    item.className = 'remember-item';
-    item.innerHTML = '<div class="remember-dot"></div><div class="remember-text">' + REMEMBER[i] + '</div>';
-    list.appendChild(item);
-  }
-}
-
 /* ── Проверь себя ── */
 var SELFCHECK = [
   'Какая дробь больше — ' + fr(1,3) + ' или ' + fr(1,5) + '? Как проверить по числовой прямой?',
@@ -1376,18 +962,6 @@ var SELFCHECK = [
   'Назови дробь, которая находится между ' + fr(1,2) + ' и 1.',
   'Почему ' + fr(1,8) + ' меньше ' + fr(1,2) + ', если 8 &gt; 2?'
 ];
-
-function initSelfcheck() {
-  var list = document.getElementById('selfcheckList');
-  list.innerHTML = '';
-  var i;
-  for (i = 0; i < SELFCHECK.length; i++) {
-    var item = document.createElement('div');
-    item.className = 'selfcheck-item';
-    item.innerHTML = '<span class="selfcheck-num">' + (i + 1) + '.</span>' + SELFCHECK[i];
-    list.appendChild(item);
-  }
-}
 
 /* ── Финальный квиз ── */
 var QUIZ_QS = [
@@ -1413,103 +987,8 @@ var QUIZ_QS = [
     explain: fr(7,4) + ' = 1 и ' + fr(3,4) + ' — это больше 1 и меньше 2.' }
 ];
 
-var qIdx      = 0;
-var qScore    = 0;
-var qAnswered = false;
-var qResults  = [];
-
-function initQuiz() {
-  qIdx      = 0;
-  qScore    = 0;
-  qResults  = [];
-  renderQuizProg();
-  renderQuizQ();
-}
-
-function renderQuizProg() {
-  var prog = document.getElementById('qProg');
-  prog.innerHTML = '';
-  var i;
-  for (i = 0; i < QUIZ_QS.length; i++) {
-    var dot = document.createElement('div');
-    if (i < qIdx) {
-      dot.className = 'quiz-dot ' + (qResults[i] ? 'correct' : 'wrong');
-    } else if (i === qIdx) {
-      dot.className = 'quiz-dot current';
-    } else {
-      dot.className = 'quiz-dot';
-    }
-    prog.appendChild(dot);
-  }
-}
-
-function renderQuizQ() {
-  if (qIdx >= QUIZ_QS.length) { showFinish(); return; }
-  qAnswered = false;
-  var q    = QUIZ_QS[qIdx];
-  var card = document.getElementById('qCard');
-  var shuffled = shuffleArr(q.opts.map(function(o, i) { return { text: o, correct: i === q.c }; }));
-  var optsHtml = '';
-  var i;
-  for (i = 0; i < shuffled.length; i++) {
-    optsHtml += '<button class="quiz-opt" data-correct="' + (shuffled[i].correct ? 'true' : 'false') + '" onclick="quizTap(this,' + qIdx + ')">' + shuffled[i].text + '</button>';
-  }
-  card.innerHTML = '<div class="quiz-qw"><div class="quiz-cnt">Вопрос ' + (qIdx + 1) + ' из ' + QUIZ_QS.length + '</div><div class="quiz-qt">' + q.q + '</div></div>'
-    + '<div class="quiz-opts">' + optsHtml + '</div>'
-    + '<div class="quiz-explain" id="qExpl"></div>'
-    + '<button class="quiz-next" id="qNext" onclick="quizNext()" style="display:none">' + (qIdx + 1 < QUIZ_QS.length ? 'Следующий вопрос \u2192' : 'Завершить \u2192') + '</button>';
-  renderQuizProg();
-}
-
-function quizTap(btn, qi) {
-  if (qAnswered) return;
-  qAnswered = true;
-  var correct = btn.getAttribute('data-correct') === 'true';
-  var card = document.getElementById('qCard');
-  var btns = card.querySelectorAll('.quiz-opt');
-  var k;
-  for (k = 0; k < btns.length; k++) { btns[k].style.pointerEvents = 'none'; }
-  if (correct) {
-    btn.classList.add('correct');
-    qScore++;
-  } else {
-    btn.classList.add('wrong');
-    for (k = 0; k < btns.length; k++) {
-      if (btns[k].getAttribute('data-correct') === 'true') { btns[k].classList.add('correct'); }
-    }
-  }
-  qResults[qi] = correct;
-  var dot = document.getElementById('qProg').children[qi];
-  if (dot) { dot.className = 'quiz-dot ' + (correct ? 'correct' : 'wrong'); }
-  var expl = document.getElementById('qExpl');
-  expl.className = 'quiz-explain show ' + (correct ? 'ok' : 'err');
-  expl.innerHTML = QUIZ_QS[qi].explain;
-  var nextBtn = document.getElementById('qNext');
-  if (nextBtn) { nextBtn.style.display = 'block'; }
-}
-
-function quizNext() {
-  qIdx++;
-  renderQuizProg();
-  renderQuizQ();
-}
-
-function showFinish() {
-  if (checkAnswered) { try { Progress.markDone('node4'); } catch(e) {} }
-  document.getElementById('finScore').innerHTML = qScore + ' из ' + QUIZ_QS.length;
-  var ov = document.getElementById('finOv');
-  ov.className = 'finish-ov show';
-  finRedirectTimer = setTimeout(function() {
-    try { location.href = 'index.html'; } catch(e) {}
-  }, 2500);
-}
 
 var finRedirectTimer = null;
-
-function finStay() {
-  if (finRedirectTimer) { clearTimeout(finRedirectTimer); finRedirectTimer = null; }
-  document.getElementById('finOv').className = 'finish-ov';
-}
 
 /* ── DYK ── */
 var DYK = [
@@ -1535,59 +1014,7 @@ var DYK = [
   }
 ];
 
-var dykActive = -1;
 var checkAnswered = false;
-
-function initDYK() {
-  var grid = document.getElementById('dykGrid');
-  grid.innerHTML = '';
-  var i;
-  for (i = 0; i < DYK.length; i++) {
-    (function(d, idx) {
-      var card = document.createElement('div');
-      card.className = 'dyk-card';
-      card.id = 'dykCard' + idx;
-      var imgHtml = d.hasImg
-        ? '<img src="' + d.imgId + '.png" alt="' + d.title + '" style="width:100%;aspect-ratio:3/2;object-fit:cover;display:block;border-radius:0;">'
-        : '<div class="img-placeholder img-ph-3-2" style="border-radius:0;border:none;background:#EDE6D8;">'
-          + '<div class="img-placeholder-icon">\uD83D\uDDBC</div>'
-          + '<div class="img-placeholder-id">' + d.imgId + ' \xb7 3:2</div>'
-          + '<div class="img-placeholder-desc" style="font-size:15px;">' + d.imgDesc + '</div>'
-          + '</div>';
-      card.innerHTML = imgHtml
-        + '<div class="dyk-card-body">'
-        + '<div class="dyk-tag">' + d.tag + '</div>'
-        + '<div class="dyk-title">' + d.title + '</div>'
-        + '</div>';
-      card.onclick = function() { dykTap(idx); };
-      grid.appendChild(card);
-    })(DYK[i], i);
-  }
-}
-
-function dykTap(idx) {
-  var grid  = document.getElementById('dykGrid');
-  var panel = document.getElementById('dykPanel');
-  var cards = grid.querySelectorAll('.dyk-card');
-  var d = DYK[idx];
-  var i;
-
-  if (dykActive === idx) {
-    dykActive = -1;
-    for (i = 0; i < cards.length; i++) { cards[i].className = 'dyk-card'; }
-    panel.className = 'dyk-panel';
-    panel.innerHTML = '';
-    return;
-  }
-
-  dykActive = idx;
-  for (i = 0; i < cards.length; i++) { cards[i].className = 'dyk-card'; }
-  cards[idx].className = 'dyk-card active';
-
-  panel.className = 'dyk-panel open';
-  panel.innerHTML = '<div class="dyk-panel-head"><div class="dyk-panel-tag">' + d.tag + '</div><div class="dyk-panel-title">' + d.title + '</div></div>'
-    + '<div class="dyk-panel-body"><p class="dyk-panel-teaser">' + d.teaser + '</p>' + d.text + '</div>';
-}
 
 /* ── Инициализация ── */
 updateSim();

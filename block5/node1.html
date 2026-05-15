@@ -468,6 +468,7 @@ function initCheck() {
 
 function chk(btn) {
   checkAnswered = true;
+  tryMarkDone();
   var correct = btn.getAttribute('data-correct') === 'true';
   var fb      = document.getElementById('checkFb');
   var wrap    = document.getElementById('checkOpts');
@@ -535,6 +536,8 @@ function mClick(btn) {
   if (btn.classList.contains('done') || btn.classList.contains('dis')) return;
   if (!mSel) { mSel = btn; btn.classList.add('sel'); return; }
   if (mSel === btn) { mSel.classList.remove('sel'); mSel = null; return; }
+  matchAttempted = true;
+  tryMarkDone();
   var a = mSel, b = btn;
   var ok = a.dataset.side !== b.dataset.side &&
            (a.dataset.key === b.dataset.key);
@@ -573,6 +576,11 @@ function initRead() {
 }
 
 function rdAns(btn, qi) {
+  if (!readAnswered[qi]) {
+    readAnswered[qi] = true;
+    readCount++;
+    if (readCount >= READ_QS.length) { readAttempted = true; tryMarkDone(); }
+  }
   var ok   = btn.getAttribute('data-correct') === 'true';
   var opts = btn.closest('.read-opts').querySelectorAll('.read-opt');
   var i;
@@ -595,6 +603,25 @@ var qAns = false;
 /* DYK */
 
 var checkAnswered = false;
+
+/* ── Прогресс узла ── */
+var matchAttempted = false;
+var readAttempted  = false;  /* все вопросы reading quiz */
+var quizAttempted  = false;  /* финальный квиз завершён */
+var readAnswered   = {};
+var readCount      = 0;
+
+function tryMarkDone() {
+  if (checkAnswered && matchAttempted && readAttempted && quizAttempted) {
+    Progress.markDone('node1');
+  }
+}
+
+function checkAllDone() {
+  /* вызывается из showFinish — финальный квиз пройден полностью */
+  quizAttempted = true;
+  tryMarkDone();
+}
 
 /* Инициализация */
 

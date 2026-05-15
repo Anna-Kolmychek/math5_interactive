@@ -16,15 +16,15 @@ var TIMING = {
 /* ── Прогресс ──────────────────────────────────────────────── */
 
 var Progress = {
-  _key: BLOCK_ID + '_progress',
+  _key: function() { return BLOCK_ID + '_progress'; },
 
   load: function() {
-    try { return JSON.parse(localStorage.getItem(this._key)) || {}; }
+    try { return JSON.parse(localStorage.getItem(this._key())) || {}; }
     catch(e) { return {}; }
   },
 
   save: function(data) {
-    try { localStorage.setItem(this._key, JSON.stringify(data)); }
+    try { localStorage.setItem(this._key(), JSON.stringify(data)); }
     catch(e) {}
   },
 
@@ -61,7 +61,7 @@ var Progress = {
   },
 
   reset: function() {
-    try { localStorage.removeItem(this._key); } catch(e) {}
+    try { localStorage.removeItem(this._key()); } catch(e) {}
   }
 };
 

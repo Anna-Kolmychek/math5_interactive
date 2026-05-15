@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Узел 3 · Сравнение и округление чисел</title>
+  <link rel="stylesheet" href="../shared.css">
+  <style>
+    /* Симуляция 1 — числовая прямая сравнения */
+    .nl-wrap { position: relative; height: 72px; margin: 8px 0 4px; }
+    .nl-line {
+      position: absolute; left: 24px; right: 24px; top: 36px;
+      height: 3px; background: #E0D8CC; border-radius: 2px;
+    }
+    .nl-arrow {
+      position: absolute; right: 12px; top: 28px;
+      width: 0; height: 0;
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+      border-left: 10px solid #E0D8CC;
+    }
+    .nl-ticks { position: absolute; left: 24px; right: 24px; top: 0; bottom: 0; }
+    .nl-tick {
+      position: absolute; top: 28px; width: 1.5px; height: 16px;
+      background: #C4B89A; transform: translateX(-50%);
+    }
+    .nl-tick.major { background: #888; }
+    .nl-label {
+      position: absolute; top: 48px;
+      font-family: var(--font-main); font-size: 11px; font-weight: 700;
+      color: #999; transform: translateX(-50%); white-space: nowrap;
+    }
+    .nl-pt {
+      position: absolute; top: 22px; width: 20px; height: 20px;
+      border-radius: 50%; border: 2.5px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2); transform: translateX(-50%);
+      transition: left 0.25s;
+    }
+    .nl-pt-a { background: #C47C1A; }
+    .nl-pt-b { background: #888; }
+    .nl-pt.active-pt { background: #C47C1A; }
+    .nl-pt.passive-pt { background: #C4B89A; }
+    .nl-pt-lbl {
+      position: absolute; top: 4px;
+      font-family: var(--font-main); font-size: 9px; font-weight: 900;
+      color: #fff; transform: translateX(-50%); pointer-events: none;
+    }
+    .nl-relation {
+      text-align: center; margin-top: 6px;
+      font-family: var(--font-main); font-size: 22px; font-weight: 900;
+      color: #C47C1A; min-height: 30px;
+    }
+
+    /* Симуляция 2 — прыжок к отметке */
+    .jump-line-wrap { position: relative; height: 88px; margin: 8px 0 4px; overflow-x: auto; }
+    .jump-inner { position: relative; height: 88px; min-width: 280px; max-width: 600px; margin: 0 auto; }
+    .jump-base-line {
+      position: absolute; left: 28px; right: 28px; top: 44px;
+      height: 3px; background: #E0D8CC; border-radius: 2px;
+    }
+    .jump-arrow {
+      position: absolute; right: 16px; top: 36px;
+      width: 0; height: 0;
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+      border-left: 10px solid #E0D8CC;
+    }
+    .jump-anchor {
+      position: absolute; top: 34px; width: 2px; height: 20px;
+      background: #888; transform: translateX(-50%);
+    }
+    .jump-anchor-lbl {
+      position: absolute; top: 58px;
+      font-family: var(--font-main); font-size: 11px; font-weight: 700;
+      color: #555; transform: translateX(-50%); white-space: nowrap;
+    }
+    .jump-source {
+      position: absolute; top: 28px; width: 20px; height: 20px;
+      border-radius: 50%; background: #888; border: 2.5px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2); transform: translateX(-50%);
+      transition: left 0.2s;
+    }
+    .jump-result {
+      position: absolute; top: 28px; width: 20px; height: 20px;
+      border-radius: 50%; background: #C47C1A; border: 2.5px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2); transform: translateX(-50%);
+      transition: left 0.3s;
+    }
+    .jump-label-src {
+      position: absolute; top: 4px;
+      font-family: var(--font-main); font-size: 9px; font-weight: 900;
+      color: #fff; transform: translateX(-50%); white-space: nowrap;
+    }
+    .jump-label-res {
+      position: absolute; top: 4px;
+      font-family: var(--font-main); font-size: 9px; font-weight: 900;
+      color: #fff; transform: translateX(-50%); white-space: nowrap;
+    }
+    .jump-status {
+      text-align: center; font-family: var(--font-main);
+      font-size: 18px; font-weight: 900; color: #C47C1A;
+      min-height: 26px; margin-top: 4px;
+    }
+    .jump-rule-btns {
+      display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .jump-rule-btn {
+      padding: 8px 14px; border: 1.5px solid #E0D8CC; border-radius: 10px;
+      background: #fff; font-family: var(--font-main); font-size: 14px;
+      font-weight: 700; color: #555; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .jump-rule-btn.active { border-color: #C47C1A; background: #FFF8ED; color: #7A4A0A; }
+
+    /* Sort */
+    .sort-wrap { padding: 16px; }
+    .sort-header { font-size: 15px; font-weight: 700; color: #555; margin-bottom: 10px; text-align: center; }
+    .sort-bank {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      justify-content: center; margin-bottom: 10px;
+    }
+    .sort-chip {
+      background: #fff; border: 1.5px solid #E0D8CC;
+      border-radius: 8px; padding: 6px 12px;
+      font-family: var(--font-main); font-size: 16px; font-weight: 800;
+      color: #333; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .sort-chip.sel { border-color: #C47C1A; background: #FFF8ED; color: #C47C1A; }
+    .sort-chip.placed { opacity: 0.25; pointer-events: none; }
+    .sort-slots {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      justify-content: center; margin-bottom: 8px; min-height: 44px;
+    }
+    .sort-slot {
+      min-width: 56px; height: 38px; padding: 0 6px;
+      border: 1.5px dashed #C4B89A; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-main); font-size: 15px; font-weight: 800;
+      color: #C4B89A; background: transparent; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .sort-slot.filled { border-style: solid; border-color: #C47C1A; background: #FFF8ED; color: #333; }
+    .sort-slot.correct { border-color: #22C55E; background: #ECFDF5; color: #166534; }
+    .sort-slot.wrong   { border-color: #F87171; background: #FEF2F2; color: #991B1B; }
+    .sort-fb { text-align: center; font-size: 14px; font-weight: 700; color: #AAA098; min-height: 20px; }
+    .sort-check-btn {
+      display: block; margin: 10px auto 0;
+      background: #C47C1A; color: #fff;
+      border: none; border-radius: 10px; padding: 10px 24px;
+      font-family: var(--font-main); font-size: 14px; font-weight: 800;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+    .sort-reset-btn {
+      display: none; margin: 8px auto 0;
+      background: #fff; color: #666;
+      border: 1.5px solid #E0D8CC; border-radius: 10px; padding: 8px 20px;
+      font-family: var(--font-main); font-size: 13px; font-weight: 700;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Round table trainer */
+    .round-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+    .round-table td, .round-table th {
+      border: 1px solid #E0D8CC; padding: 8px 6px;
+      font-family: var(--font-main); font-size: 14px; font-weight: 600; color: #333;
+      text-align: center; vertical-align: middle;
+    }
+    .round-table th { background: #FFF8ED; font-size: 13px; font-weight: 800; color: #7A4A0A; }
+    .round-table td.task-cell { text-align: left; font-weight: 700; }
+    .round-opt-btn {
+      width: 100%; padding: 6px 2px; border: 1.5px solid #E0D8CC;
+      border-radius: 6px; background: #fff;
+      font-family: var(--font-main); font-size: 14px; font-weight: 700; color: #333;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+    .round-opt-btn.sel  { border-color: #C47C1A; background: #FFF8ED; color: #7A4A0A; }
+    .round-opt-btn.ok   { border-color: #22C55E; background: #ECFDF5; color: #166534; pointer-events: none; }
+    .round-opt-btn.err  { border-color: #F87171; background: #FEF2F2; color: #991B1B; pointer-events: none; }
+    .round-opt-btn.dis  { pointer-events: none; opacity: 0.55; }
+    .round-check-btn {
+      display: block; margin: 0 auto; background: #C47C1A; color: #fff;
+      border: none; border-radius: 10px; padding: 10px 24px;
+      font-family: var(--font-main); font-size: 14px; font-weight: 800;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+    .round-reset-btn {
+      display: none; margin: 8px auto 0;
+      background: #fff; color: #666;
+      border: 1.5px solid #E0D8CC; border-radius: 10px; padding: 8px 20px;
+      font-family: var(--font-main); font-size: 13px; font-weight: 700;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+    .round-fb { text-align: center; font-size: 14px; font-weight: 700; color: #AAA098; min-height: 20px; margin-bottom: 8px; }
+
+    @media (min-width: 600px) {
+      .nl-label { font-size: clamp(11px, 1.7vw, 13px); }
+      .nl-relation { font-size: clamp(22px, 3vw, 28px); }
+      .sort-chip { font-size: clamp(16px, 2.2vw, 20px); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-badge">3</div>
+    <div class="topbar-title">Сравнение и округление</div>
+    <a href="index.html" class="topbar-back">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      На плакат
+    </a>
+  </div>
+</div>
+
+<div class="page">
+<div class="col">
+
+  <!-- 1. HOOK -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="#0D0C59"><path d="M11.95 18q.525 0 .888-.363t.362-.887t-.362-.888t-.888-.362t-.887.363t-.363.887t.363.888t.887.362m.05 4q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m.1-12.3q.625 0 1.088.4t.462 1q0 .55-.337.975t-.763.8q-.575.5-1.012 1.1t-.438 1.35q0 .35.263.588t.612.237q.375 0 .638-.25t.337-.625q.1-.525.45-.937t.75-.788q.575-.55.988-1.2t.412-1.45q0-1.275-1.037-2.087T12.1 6q-.95 0-1.812.4T8.975 7.625q-.175.3-.112.638t.337.512q.35.2.725.125t.625-.425q.275-.375.688-.575t.862-.2"/></svg></div><span class="sec-pill-text">Подумай перед началом</span></div></div>
+    <div class="hook-card">
+      <div class="img-placeholder img-ph-16-7" style="border-radius:12px 12px 0 0;">
+        <div class="img-placeholder-icon">&#127941;</div>
+        <div class="img-placeholder-id">node3_img1</div>
+        <div class="img-placeholder-desc">Судья на соревнованиях по прыжкам в длину держит табличку с результатами: 895 см и 887 см</div>
+      </div>
+      <div class="hook-text-wrap">
+        <div class="hook-label">Вопрос</div>
+        <div class="hook-text">На чемпионате мира 1991 года Майк Пауэлл прыгнул в длину на 895 сантиметров — мировой рекорд. Его соперник Карл Льюис прыгнул 891 см. Разница — 4 сантиметра, меньше ширины двух пальцев. <strong>895 и 887 — оба трёхзначные, оба начинаются на 8. Как быстро определить, какое больше?</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. СИМУЛЯЦИЯ 1 — кто левее на числовой прямой -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 512 512" fill="#0D0C59"><path fill-rule="evenodd" d="M421.935 90.066c2.286 2.287 5.356 7.973 4.013 21.398c-1.323 13.221-6.731 30.687-16.845 51.505a306 306 0 0 1-3.77 7.492v42.31c39.823-61.993 54.037-115.44 31.687-137.79c-22.529-22.528-76.652-7.907-139.277 32.646l20.879 12.054c10.535-6.46 20.717-12.073 30.411-16.783c20.817-10.114 38.283-15.522 51.504-16.845c13.425-1.343 19.112 1.727 21.398 4.013M405.333 341.54v-42.31c39.823 61.993 54.037 115.44 31.687 137.79c-22.536 22.536-76.689 7.897-139.341-32.687l20.877-12.053c10.559 6.477 20.763 12.104 30.477 16.823c20.817 10.114 38.283 15.522 51.505 16.845c13.424 1.343 19.111-1.727 21.397-4.013c2.287-2.287 5.357-7.973 4.013-21.398c-1.322-13.221-6.73-30.687-16.845-51.505a306 306 0 0 0-3.77-7.492m-211.888 50.74l20.876 12.053c-62.651 40.584-116.804 55.223-139.34 32.687c-22.35-22.35-8.136-75.795 31.686-137.788v42.31a309 309 0 0 0-3.769 7.49c-10.114 20.818-15.522 38.284-16.845 51.505c-1.343 13.425 1.727 19.111 4.013 21.398c2.287 2.286 7.973 5.356 21.398 4.013c13.221-1.323 30.687-6.731 51.505-16.845c9.713-4.719 19.917-10.346 30.476-16.823M74.981 74.981c-22.35 22.35-8.136 75.795 31.686 137.788v-42.311a308 308 0 0 1-3.769-7.489c-10.114-20.818-15.522-38.284-16.845-51.505c-1.343-13.425 1.727-19.111 4.013-21.398c2.287-2.286 7.973-5.356 21.398-4.013c13.221 1.323 30.687 6.73 51.505 16.845c9.693 4.709 19.874 10.322 30.41 16.782l20.878-12.054C151.633 67.074 97.51 52.453 74.981 74.981M256 108.16l128 73.901v147.801l-128 73.901l-128-73.901V182.06zm85.333 123.132v73.937l-64 36.95v-73.937zm-106.666 36.95v73.937l-64-36.95v-73.937zM256 231.291l-63.969-36.933L256 157.426l63.969 36.932z" clip-rule="evenodd"/></svg></div><span class="sec-pill-text">Симуляция 1 — кто правее?</span></div></div>
+    <div class="card">
+      <div class="sim-top">
+        <div style="padding:12px 16px 0;">
+          <div style="display:flex;gap:16px;justify-content:center;align-items:center;flex-wrap:wrap;margin-bottom:8px;">
+            <div style="font-family:var(--font-main);font-size:15px;font-weight:700;color:#555;">
+              A = <span id="valA" style="color:#C47C1A;font-size:20px;font-weight:900;">999</span>
+            </div>
+            <div id="relSign" style="font-family:var(--font-main);font-size:24px;font-weight:900;color:#C47C1A;min-width:30px;text-align:center;">&gt;</div>
+            <div style="font-family:var(--font-main);font-size:15px;font-weight:700;color:#555;">
+              B = <span id="valB" style="color:#888;font-size:20px;font-weight:900;">1000</span>
+            </div>
+          </div>
+          <div class="nl-wrap" id="nl1Wrap">
+            <div class="nl-line"></div>
+            <div class="nl-arrow"></div>
+            <div class="nl-ticks" id="nl1Ticks"></div>
+            <div class="nl-pt" id="ptA"><span class="nl-pt-lbl">A</span></div>
+            <div class="nl-pt" id="ptB"><span class="nl-pt-lbl">B</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="sliders">
+        <div class="slider-row">
+          <div class="slider-lbl">
+            <span class="slider-lbl-t">Число A</span>
+            <span class="slider-val" id="aDisp">999</span>
+          </div>
+          <input type="range" id="slA" min="0" max="9999" value="999" step="1">
+        </div>
+        <div class="slider-row">
+          <div class="slider-lbl">
+            <span class="slider-lbl-t">Число B</span>
+            <span class="slider-val" id="bDisp">1000</span>
+          </div>
+          <input type="range" id="slB" min="0" max="9999" value="1000" step="1">
+        </div>
+      </div>
+      <div class="presets" style="padding:0 16px 12px;">
+        <button class="preset-btn" onclick="setAB(999,1000)">999 и 1&#160;000</button>
+        <button class="preset-btn" onclick="setAB(3099,3100)">3&#160;099 и 3&#160;100</button>
+        <button class="preset-btn" onclick="setAB(5000,4999)">5&#160;000 и 4&#160;999</button>
+        <button class="preset-btn" onclick="setAB(7070,7007)">7&#160;070 и 7&#160;007</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. ЧЕК-ВОПРОС ДО СИМУЛЯЦИИ 2 -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="#0D0C59"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m1 17h-2v-2h2zm2.07-7.75-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25"/></svg></div><span class="sec-pill-text">Чек-вопрос</span></div></div>
+    <div class="card">
+      <div style="padding:14px 16px;">
+        <div class="check-q" id="preCheckQ">Петя утверждает: «6&#160;899 &gt; 7&#160;001, потому что 8 и 9 больше, чем 0 и 0». Он прав?</div>
+        <div class="check-opts" id="preCheckOpts"></div>
+        <div class="check-fb" id="preCheckFb"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. СИМУЛЯЦИЯ 2 — прыжок к ближайшей отметке -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 512 512" fill="#0D0C59"><path fill-rule="evenodd" d="M421.935 90.066c2.286 2.287 5.356 7.973 4.013 21.398c-1.323 13.221-6.731 30.687-16.845 51.505a306 306 0 0 1-3.77 7.492v42.31c39.823-61.993 54.037-115.44 31.687-137.79c-22.529-22.528-76.652-7.907-139.277 32.646l20.879 12.054c10.535-6.46 20.717-12.073 30.411-16.783c20.817-10.114 38.283-15.522 51.504-16.845c13.425-1.343 19.112 1.727 21.398 4.013M405.333 341.54v-42.31c39.823 61.993 54.037 115.44 31.687 137.79c-22.536 22.536-76.689 7.897-139.341-32.687l20.877-12.053c10.559 6.477 20.763 12.104 30.477 16.823c20.817 10.114 38.283 15.522 51.505 16.845c13.424 1.343 19.111-1.727 21.397-4.013c2.287-2.287 5.357-7.973 4.013-21.398c-1.322-13.221-6.73-30.687-16.845-51.505a306 306 0 0 0-3.77-7.492m-211.888 50.74l20.876 12.053c-62.651 40.584-116.804 55.223-139.34 32.687c-22.35-22.35-8.136-75.795 31.686-137.788v42.31a309 309 0 0 0-3.769 7.49c-10.114 20.818-15.522 38.284-16.845 51.505c-1.343 13.425 1.727 19.111 4.013 21.398c2.287 2.286 7.973 5.356 21.398 4.013c13.221-1.323 30.687-6.731 51.505-16.845c9.713-4.719 19.917-10.346 30.476-16.823M74.981 74.981c-22.35 22.35-8.136 75.795 31.686 137.788v-42.311a308 308 0 0 1-3.769-7.489c-10.114-20.818-15.522-38.284-16.845-51.505c-1.343-13.425 1.727-19.111 4.013-21.398c2.287-2.286 7.973-5.356 21.398-4.013c13.221 1.323 30.687 6.73 51.505 16.845c9.693 4.709 19.874 10.322 30.41 16.782l20.878-12.054C151.633 67.074 97.51 52.453 74.981 74.981M256 108.16l128 73.901v147.801l-128 73.901l-128-73.901V182.06zm85.333 123.132v73.937l-64 36.95v-73.937zm-106.666 36.95v73.937l-64-36.95v-73.937zM256 231.291l-63.969-36.933L256 157.426l63.969 36.932z" clip-rule="evenodd"/></svg></div><span class="sec-pill-text">Симуляция 2 — прыжок к ближайшей отметке</span></div></div>
+    <div class="card">
+      <div class="sim-top">
+        <div style="padding:12px 16px 0;">
+          <div class="jump-rule-btns" id="ruleBtns">
+            <button class="jump-rule-btn active" id="rBtn10" onclick="setRule(10)">до десятков</button>
+            <button class="jump-rule-btn" id="rBtn100" onclick="setRule(100)">до сотен</button>
+            <button class="jump-rule-btn" id="rBtn1000" onclick="setRule(1000)">до тысяч</button>
+          </div>
+          <div class="jump-line-wrap">
+            <div class="jump-inner" id="jumpInner">
+              <div class="jump-base-line"></div>
+              <div class="jump-arrow"></div>
+              <div id="jumpAnchorLo" class="jump-anchor"></div>
+              <div id="jumpAnchorLoLbl" class="jump-anchor-lbl"></div>
+              <div id="jumpAnchorHi" class="jump-anchor"></div>
+              <div id="jumpAnchorHiLbl" class="jump-anchor-lbl"></div>
+              <div class="jump-source" id="jumpSrc"><span class="jump-label-src" id="jumpSrcLbl">X</span></div>
+              <div class="jump-result" id="jumpRes"><span class="jump-label-res">&#8776;</span></div>
+            </div>
+          </div>
+          <div class="jump-status" id="jumpStatus"></div>
+        </div>
+      </div>
+      <div class="sliders">
+        <div class="slider-row">
+          <div class="slider-lbl">
+            <span class="slider-lbl-t">Число</span>
+            <span class="slider-val" id="jumpNumDisp">347</span>
+          </div>
+          <input type="range" id="slJump" min="100" max="9999" value="347" step="1">
+        </div>
+      </div>
+      <div class="presets" style="padding:0 16px 4px;">
+        <button class="preset-btn" onclick="setJump(347)">347</button>
+        <button class="preset-btn" onclick="setJump(4650)">4&#160;650</button>
+        <button class="preset-btn" onclick="setJump(8500)">8&#160;500</button>
+        <button class="preset-btn" onclick="setJump(3200)">3&#160;200</button>
+      </div>
+      <div class="check-wrap" style="margin-top:8px;">
+        <div class="check-q">Число 4&#160;650 округлили до тысяч. Что получилось?</div>
+        <div class="check-opts" id="checkOpts"></div>
+        <div class="check-fb" id="checkFb"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ОБЪЯСНЕНИЕ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="#0D0C59"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74c0-3.86-3.14-7-7-7m2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A5 5 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1"/></svg></div><span class="sec-pill-text">Главная идея</span></div></div>
+    <div class="card">
+      <div class="expl-block">
+        <div class="expl-lbl">Сравнение и округление</div>
+        <div class="expl-t">Сравнение — определение порядка: какое число левее на числовой прямой. Округление — замена числа ближайшим «круглым» числа нужного разряда. Оба действия опираются на числовую прямую.</div>
+      </div>
+      <div class="expl-block">
+        <div class="expl-lbl">Сравнение многозначных чисел</div>
+        <div class="expl-t">Сравнивают поразрядно — <strong>слева направо</strong>. Сначала считают цифры: четырёхзначное всегда больше трёхзначного. Если цифр поровну — ищут первый разряд, где цифры различаются. У кого там больше — тот и выиграл. 7&#160;485 &gt; 7&#160;399 потому что в разряде сотен 4 &gt; 3.</div>
+      </div>
+      <div class="expl-block">
+        <div class="expl-lbl">Точность округления</div>
+        <div class="expl-t">Разряд округления выбирают под задачу. Высота Эвереста — до метров: 8&#160;849 м. Население страны — до миллионов. Чем крупнее разряд, тем грубее приближение — но иногда это и нужно.</div>
+      </div>
+      <div class="expl-block">
+        <div class="expl-lbl">Не путай</div>
+        <div class="expl-alert">Округление <strong>не всегда уменьшает</strong> число. 4&#160;650 &#8594; 5&#160;000 — число выросло. Округление выбирает ближайшее, а не меньшее.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ОПОРНЫЙ КОНСПЕКТ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="#0D0C59"><path d="M5 3c-1.11 0-2 .89-2 2v14c0 1.11.89 2 2 2h14c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 2h14v14H5zm2 2v2h10V7zm0 4v2h10v-2zm0 4v2h7v-2z"/></svg></div><span class="sec-pill-text">Опорный конспект</span></div></div>
+    <button class="cs-toggle" id="csToggle" onclick="toggleCS()">
+      <span>Открыть — читай перед контрольной</span>
+      <span class="cs-toggle-icon">&#9662;</span>
+    </button>
+    <div class="cs-body card" id="csBody">
+      <div class="cs-block">
+        <div class="cs-lbl">Что это</div>
+        <div class="cs-text">Сравнение — определение порядка двух чисел (какое больше, правее на числовой прямой). Округление — замена числа ближайшим значением выбранного разряда.</div>
+      </div>
+      <div class="cs-block">
+        <div class="cs-lbl">Главные факты</div>
+        <div class="cs-list">
+          <div class="cs-item">Четырёхзначное число всегда больше трёхзначного</div>
+          <div class="cs-item">Сравнивают поразрядно слева направо: первый отличающийся разряд решает всё</div>
+          <div class="cs-item">Округляют по цифре следующего разряда: &#8805; 5 — вверх, &lt; 5 — вниз</div>
+          <div class="cs-item">Округление до десятков: смотрим на единицы. До сотен: на десятки. До тысяч: на сотни</div>
+          <div class="cs-item">Знак приближения: 3&#160;748 &#8776; 3&#160;700</div>
+        </div>
+      </div>
+      <div class="cs-block">
+        <div class="cs-lbl">Не путать</div>
+        <div class="cs-confusion">
+          <div class="cs-conf-row">
+            <div class="cs-conf-wrong">«Округлить вниз» всегда уменьшает число — неверно</div>
+            <div class="cs-conf-right">4&#160;650 &#8594; 5&#160;000: число выросло. Округление выбирает ближайшую отметку, а не меньшую</div>
+          </div>
+          <div class="cs-conf-row">
+            <div class="cs-conf-wrong">3&#160;099 &gt; 3&#160;100, «потому что 9 больше 1» — неверно</div>
+            <div class="cs-conf-right">Смотрим на сотни: у 3&#160;099 — 0 сотен, у 3&#160;100 — 1 сотня. 3&#160;100 &gt; 3&#160;099</div>
+          </div>
+        </div>
+      </div>
+      <div class="cs-block">
+        <div class="cs-lbl">Приём для запоминания</div>
+        <div class="cs-hint">Округляешь — зачеркни всё правее нужного разряда и посмотри на первую зачёркнутую цифру. &#8805; 5 — прибавь 1 к последней оставшейся. &lt; 5 — оставь как есть.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. ГЛОССАРИЙ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 256 256" fill="#0D0C59"><path d="M85.43 53.45a6 6 0 0 0-10.86 0l-64 136a6 6 0 1 0 10.86 5.11L38.63 158h82.74l17.2 36.55a6 6 0 1 0 10.86-5.11ZM44.28 146L80 70.09L115.72 146ZM200 98c-12.21 0-21.71 3.28-28.23 9.74a6 6 0 0 0 8.46 8.52c4.18-4.15 10.84-6.26 19.77-6.26c14.34 0 26 9.87 26 22v7.24a40.36 40.36 0 0 0-26-9.24c-20.95 0-38 15.25-38 34s17.05 34 38 34a40.36 40.36 0 0 0 26-9.24V192a6 6 0 0 0 12 0v-60c0-18.75-17-34-38-34m0 88c-14.34 0-26-9.87-26-22s11.66-22 26-22s26 9.87 26 22s-11.66 22-26 22"/></svg></div><span class="sec-pill-text">Глоссарий — тапни чтобы открыть</span></div></div>
+    <div class="gloss-list" id="glossList"></div>
+  </div>
+
+  <!-- 8. ТРЕНАЖЁР SORT -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-train"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#854D0E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="15" width="7" height="7" rx="1"/><rect x="14" y="15" width="7" height="7" rx="1"/><path d="M10 7.5h4M10 18.5h4"/></svg></div><span class="sec-pill-text">Тренажёр — расставь числа по порядку</span></div></div>
+    <div class="card">
+      <div class="sort-wrap">
+        <div class="sort-header">Расставь числа от наименьшего к наибольшему: выбери число внизу, затем нажми нужный слот</div>
+        <div class="sort-slots" id="sortSlots"></div>
+        <div class="sort-bank" id="sortBank"></div>
+        <div class="sort-fb" id="sortFb"></div>
+        <button class="sort-check-btn" id="sortCheckBtn" onclick="sortCheck()">Проверить порядок</button>
+        <button class="sort-reset-btn" id="sortResetBtn" onclick="initSort()">Попробовать снова</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. ТРЕНАЖЁР — ОКРУГЛИ ДО ТЫСЯЧ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-train"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#854D0E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="15" width="7" height="7" rx="1"/><rect x="14" y="15" width="7" height="7" rx="1"/><path d="M10 7.5h4M10 18.5h4"/></svg></div><span class="sec-pill-text">Тренажёр — округли до тысяч</span></div></div>
+    <div class="card" style="padding:16px;">
+      <div class="round-fb" id="roundFb"></div>
+      <table class="round-table">
+        <thead>
+          <tr>
+            <th>Задание</th>
+            <th>6&#160;000</th>
+            <th>7&#160;000</th>
+            <th>8&#160;000</th>
+            <th>9&#160;000</th>
+          </tr>
+        </thead>
+        <tbody id="roundBody"></tbody>
+      </table>
+      <button class="round-check-btn" id="roundCheckBtn" onclick="roundCheck()">Проверить</button>
+      <button class="round-reset-btn" id="roundResetBtn" onclick="initRound()">Попробовать снова</button>
+    </div>
+  </div>
+
+  <!-- 10. READING QUIZ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0D0C59" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="M11 16.5s1.5.5 2.25 2.5c0 0 3.573-5.833 6.75-7"/><path d="M4 5h14M4 10h11M4 15h4"/></svg></div><span class="sec-pill-text">Читай и отвечай</span></div></div>
+    <div class="card">
+      <div class="read-tag">Математика в небе</div>
+      <div class="img-placeholder img-ph-16-7">
+        <div class="img-placeholder-icon">&#9992;</div>
+        <div class="img-placeholder-id">node3_img2</div>
+        <div class="img-placeholder-desc">Диспетчер аэропорта смотрит на табло с высотами самолётов в метрах</div>
+      </div>
+      <div class="read-text">
+        <p>Авиадиспетчер следит за высотами самолётов. На экране: рейс SU&#160;101 — 8&#160;500 метров, рейс SU&#160;202 — 9&#160;050 метров, рейс SU&#160;303 — 11&#160;000 метров.</p>
+        <p>Чтобы сравнить высоты, диспетчер считает количество цифр: у SU&#160;303 высота 11&#160;000 — пять цифр, у остальных по четыре. Пятизначное число всегда больше четырёхзначного, значит SU&#160;303 летит выше всех — без дальнейшего сравнения.</p>
+        <p>Теперь сравниваем SU&#160;101 (8&#160;500) и SU&#160;202 (9&#160;050) — оба четырёхзначные. Смотрим на тысячи: 8 и 9. Девять больше восьми, значит SU&#160;202 выше. Итог: 11&#160;000 &gt; 9&#160;050 &gt; 8&#160;500. В переговорах с пилотами высоту округляют до тысяч метров: «набирайте десять тысяч» вместо «девять тысяч пятьдесят».</p>
+      </div>
+      <div class="read-qs" id="readQs"></div>
+    </div>
+  </div>
+
+  <!-- 11. MISCONCEPTIONS -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-err"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L2 21h20L12 3z"/><path d="M12 10v4M12 17v.5"/></svg></div><span class="sec-pill-text">Так часто думают — но это неверно</span></div></div>
+    <div class="misc-grid" id="miscGrid"></div>
+    <div class="misc-panel" id="miscPanel"></div>
+  </div>
+
+  <!-- 12. ЗАПОМНИ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-train"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#854D0E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18l7-4 7 4V3H5z"/></svg></div><span class="sec-pill-text">Запомни</span></div></div>
+    <div class="remember-list" id="rememberList"></div>
+  </div>
+
+  <!-- 13. ПРОВЕРЬ СЕБЯ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-train"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#854D0E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg></div><span class="sec-pill-text">Проверь себя</span></div></div>
+    <div class="selfcheck-list" id="selfcheckList"></div>
+  </div>
+
+  <!-- 14. ФИНАЛЬНЫЙ КВИЗ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-train"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#854D0E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L4 14h7l-1 7 9-11h-7l1-7z"/></svg></div><span class="sec-pill-text">Финальный квиз</span></div></div>
+    <div class="quiz-prog" id="qProg"></div>
+    <div class="card" id="qCard"></div>
+  </div>
+
+  <!-- 15. DYK -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 56 56" fill="#0D0C59"><path d="M28 51.906c13.055 0 23.906-10.828 23.906-23.906c0-13.055-10.875-23.906-23.93-23.906C14.899 4.094 4.095 14.945 4.095 28c0 13.078 10.828 23.906 23.906 23.906m0-3.984C16.937 47.922 8.1 39.062 8.1 28c0-11.04 8.813-19.922 19.876-19.922c11.039 0 19.921 8.883 19.945 19.922c.023 11.063-8.883 19.922-19.922 19.922m-.023-15.68c1.124 0 1.757-.633 1.78-1.851l.352-12.375c.024-1.196-.914-2.086-2.156-2.086c-1.266 0-2.156.867-2.133 2.062l.305 12.399c.023 1.195.68 1.851 1.852 1.851m0 7.617c1.335 0 2.53-1.078 2.53-2.437c0-1.383-1.171-2.438-2.53-2.438c-1.383 0-2.532 1.078-2.532 2.438c0 1.336 1.172 2.437 2.532 2.437"/></svg></div><span class="sec-pill-text">Знаешь ли ты что...</span></div></div>
+    <div class="dyk-grid" id="dykGrid"></div>
+    <div class="dyk-panel" id="dykPanel"></div>
+  </div>
+
+</div>
+</div>
+
+<div class="bottom-back">
+  <a href="index.html" class="back-to-poster">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    На плакат
+  </a>
+</div>
+
+<div class="finish-ov" id="finOv">
+  <div class="finish-card">
+    <div class="finish-icon">&#10003;</div>
+    <div class="finish-title">Тема пройдена!</div>
+    <div class="finish-score">Квиз: <strong id="finScore">5 из 5</strong></div>
+    <div class="finish-btns">
+      <a href="index.html" class="finish-btn finish-btn-sec">На плакат</a>
+      <button class="finish-btn finish-btn-pri" onclick="finStay()">Остаться в теме</button>
+    </div>
+  </div>
+</div>
+
+<script src="../shared.js"></script>
+<script>
+
+function shuffleArr(arr) {
+  var a = arr.slice(), i, j, t;
+  for (i = a.length - 1; i > 0; i--) {
+    j = Math.floor(Math.random() * (i + 1));
+    t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+/* ── Симуляция 1 — сравнение ── */
+
+function setAB(a, b) {
+  document.getElementById('slA').value = a;
+  document.getElementById('slB').value = b;
+  updateSim1();
+}
+
+function updateSim1() {
+  var a = parseInt(document.getElementById('slA').value, 10);
+  var b = parseInt(document.getElementById('slB').value, 10);
+  document.getElementById('aDisp').textContent = a;
+  document.getElementById('bDisp').textContent = b;
+  document.getElementById('valA').textContent = a;
+  document.getElementById('valB').textContent = b;
+
+  var sign = (a > b) ? '>' : (a < b) ? '<' : '=';
+  document.getElementById('relSign').textContent = sign;
+
+  var minV = Math.min(a, b);
+  var maxV = Math.max(a, b);
+  var span = Math.max(maxV - minV, 200);
+  var lo = Math.max(0, minV - span * 0.2);
+  var hi = lo + span * 1.4;
+
+  var ptA = document.getElementById('ptA');
+  var ptB = document.getElementById('ptB');
+  var pctA = (a - lo) / (hi - lo) * 100;
+  var pctB = (b - lo) / (hi - lo) * 100;
+  pctA = Math.max(2, Math.min(96, pctA));
+  pctB = Math.max(2, Math.min(96, pctB));
+  ptA.style.left = pctA + '%';
+  ptB.style.left = pctB + '%';
+
+  if (a > b) {
+    ptA.className = 'nl-pt active-pt';
+    ptB.className = 'nl-pt passive-pt';
+  } else if (b > a) {
+    ptA.className = 'nl-pt passive-pt';
+    ptB.className = 'nl-pt active-pt';
+  } else {
+    ptA.className = 'nl-pt active-pt';
+    ptB.className = 'nl-pt active-pt';
+  }
+}
+
+document.getElementById('slA').addEventListener('input', updateSim1);
+document.getElementById('slB').addEventListener('input', updateSim1);
+updateSim1();
+
+/* ── Чек-вопрос до симуляции 2 ── */
+
+var PRE_OPTS = [
+  { text: '&#1044;&#1072; &#8212; 8 &#1080; 9 &#1076;&#1077;&#1081;&#1089;&#1090;&#1074;&#1080;&#1090;&#1077;&#1083;&#1100;&#1085;&#1086; &#1073;&#1086;&#1083;&#1100;&#1096;&#1077;, &#1095;&#1077;&#1084; 0', correct: false },
+  { text: '&#1053;&#1077;&#1090; &#8212; 7&#160;001 &#1073;&#1086;&#1083;&#1100;&#1096;&#1077;, &#1074; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1077; &#1090;&#1099;&#1089;&#1103;&#1095; 7 &gt; 6', correct: true },
+  { text: '&#1053;&#1077;&#1090; &#8212; &#1085;&#1091;&#1078;&#1085;&#1086; &#1074;&#1099;&#1095;&#1077;&#1089;&#1090;&#1100; &#1080; &#1087;&#1086;&#1089;&#1084;&#1086;&#1090;&#1088;&#1077;&#1090;&#1100; &#1079;&#1085;&#1072;&#1082;', correct: false },
+  { text: '&#1053;&#1077;&#1090; &#8212; &#1091; 7&#160;001 &#1073;&#1086;&#1083;&#1100;&#1096;&#1077; &#1094;&#1080;&#1092;&#1088;', correct: false }
+];
+
+function initPreCheck() {
+  var wrap = document.getElementById('preCheckOpts');
+  var items = shuffleArr(PRE_OPTS);
+  var html = '';
+  var i;
+  for (i = 0; i < items.length; i++) {
+    html += '<button class="check-opt" data-correct="' + items[i].correct + '" onclick="preChk(this)">' + items[i].text + '</button>';
+  }
+  wrap.innerHTML = html;
+}
+
+function preChk(btn) {
+  preCheckAnswered = true;
+  tryMarkDone();
+  var correct = btn.getAttribute('data-correct') === 'true';
+  var fb = document.getElementById('preCheckFb');
+  var wrap = document.getElementById('preCheckOpts');
+  var opts = wrap.querySelectorAll('.check-opt');
+  var i;
+  if (correct) {
+    for (i = 0; i < opts.length; i++) { opts[i].classList.add('dis'); }
+    btn.classList.remove('dis');
+    btn.classList.add('correct');
+    fb.className = 'check-fb ok';
+    fb.textContent = '&#1042;&#1077;&#1088;&#1085;&#1086;. &#1057;&#1088;&#1072;&#1074;&#1085;&#1080;&#1074;&#1072;&#1102;&#1090; &#1087;&#1086;&#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1085;&#1086; &#1089;&#1083;&#1077;&#1074;&#1072; &#1085;&#1072;&#1087;&#1088;&#1072;&#1074;&#1086;. &#1055;&#1077;&#1088;&#1074;&#1099;&#1081; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076; &#8212; &#1090;&#1099;&#1089;&#1103;&#1095;&#1080;: 6 &lt; 7. &#1069;&#1090;&#1086;&#1075;&#1086; &#1076;&#1086;&#1089;&#1090;&#1072;&#1090;&#1086;&#1095;&#1085;&#1086; &#8212; 7&#160;001 &#1073;&#1086;&#1083;&#1100;&#1096;&#1077;.';
+  } else {
+    btn.classList.add('wrong');
+    fb.className = 'check-fb err';
+    fb.textContent = '&#1055;&#1077;&#1090;&#1103; &#1089;&#1088;&#1072;&#1074;&#1085;&#1080;&#1083; &#1094;&#1080;&#1092;&#1088;&#1099; &#1085;&#1077; &#1090;&#1086;&#1075;&#1086; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1072;. &#1057;&#1088;&#1072;&#1074;&#1085;&#1077;&#1085;&#1080;&#1077; &#1085;&#1072;&#1095;&#1080;&#1085;&#1072;&#1077;&#1090;&#1089;&#1103; &#1089; &#1085;&#1072;&#1080;&#1073;&#1086;&#1083;&#1100;&#1096;&#1077;&#1075;&#1086; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1072; &#8212; &#1090;&#1099;&#1089;&#1103;&#1095;. &#1059; 6&#160;899 &#1090;&#1099;&#1089;&#1103;&#1095; 6, &#1091; 7&#160;001 &#1090;&#1099;&#1089;&#1103;&#1095; 7.';
+    setTimeout(function() {
+      btn.classList.remove('wrong');
+      fb.className = 'check-fb';
+      fb.textContent = '';
+    }, TIMING.wrongHint);
+  }
+}
+
+/* ── Симуляция 2 — округление ── */
+
+var jumpRule = 10;
+
+function setRule(r) {
+  jumpRule = r;
+  document.getElementById('rBtn10').className = (r === 10) ? 'jump-rule-btn active' : 'jump-rule-btn';
+  document.getElementById('rBtn100').className = (r === 100) ? 'jump-rule-btn active' : 'jump-rule-btn';
+  document.getElementById('rBtn1000').className = (r === 1000) ? 'jump-rule-btn active' : 'jump-rule-btn';
+  updateJump();
+}
+
+function setJump(n) {
+  document.getElementById('slJump').value = n;
+  updateJump();
+}
+
+function updateJump() {
+  var n = parseInt(document.getElementById('slJump').value, 10);
+  document.getElementById('jumpNumDisp').textContent = n;
+
+  var lo = Math.floor(n / jumpRule) * jumpRule;
+  var hi = lo + jumpRule;
+  var result = (n - lo >= jumpRule / 2) ? hi : lo;
+
+  var inner = document.getElementById('jumpInner');
+  var W = inner.offsetWidth || 300;
+  var pad = 40;
+  var usable = W - pad * 2;
+
+  var span = hi - lo;
+  var extend = span * 0.35;
+  var vizLo = lo - extend;
+  var vizHi = hi + extend;
+  var vizSpan = vizHi - vizLo;
+
+  function toX(v) {
+    return pad + (v - vizLo) / vizSpan * usable;
+  }
+
+  var xLo = toX(lo);
+  var xHi = toX(hi);
+  var xN  = toX(n);
+  var xR  = toX(result);
+
+  var aLo = document.getElementById('jumpAnchorLo');
+  var aHi = document.getElementById('jumpAnchorHi');
+  var aLoL = document.getElementById('jumpAnchorLoLbl');
+  var aHiL = document.getElementById('jumpAnchorHiLbl');
+  var src  = document.getElementById('jumpSrc');
+  var res  = document.getElementById('jumpRes');
+  var srcL = document.getElementById('jumpSrcLbl');
+  var st   = document.getElementById('jumpStatus');
+
+  aLo.style.left = xLo + 'px';
+  aHi.style.left = xHi + 'px';
+  aLoL.style.left = xLo + 'px';
+  aLoL.textContent = lo;
+  aHiL.style.left = xHi + 'px';
+  aHiL.textContent = hi;
+
+  src.style.left = xN + 'px';
+  srcL.textContent = n;
+  res.style.left = xR + 'px';
+
+  var arrow = (result > n) ? '&#8593;' : (result < n) ? '&#8595;' : '=';
+  st.innerHTML = n + ' ' + arrow + ' ' + result;
+}
+
+document.getElementById('slJump').addEventListener('input', updateJump);
+setTimeout(updateJump, 100);
+
+/* ── Чек-вопрос после симуляции 2 ── */
+
+var CHECK_OPTS = [
+  { text: '4&#160;000', correct: false },
+  { text: '5&#160;000', correct: true  },
+  { text: '4&#160;600', correct: false },
+  { text: '4&#160;700', correct: false }
+];
+
+function initCheck() {
+  var wrap = document.getElementById('checkOpts');
+  var items = shuffleArr(CHECK_OPTS);
+  var html = '';
+  var i;
+  for (i = 0; i < items.length; i++) {
+    html += '<button class="check-opt" data-correct="' + items[i].correct + '" onclick="chk(this)">' + items[i].text + '</button>';
+  }
+  wrap.innerHTML = html;
+}
+
+function chk(btn) {
+  checkAnswered = true;
+  tryMarkDone();
+  var correct = btn.getAttribute('data-correct') === 'true';
+  var fb = document.getElementById('checkFb');
+  var wrap = document.getElementById('checkOpts');
+  var opts = wrap.querySelectorAll('.check-opt');
+  var i;
+  if (correct) {
+    for (i = 0; i < opts.length; i++) { opts[i].classList.add('dis'); }
+    btn.classList.remove('dis');
+    btn.classList.add('correct');
+    fb.className = 'check-fb ok';
+    fb.textContent = '&#1042;&#1077;&#1088;&#1085;&#1086;. &#1062;&#1080;&#1092;&#1088;&#1072; &#1089;&#1086;&#1090;&#1077;&#1085; &#8212; 6, &#1086;&#1085;&#1072; &#8805; 5, &#1079;&#1085;&#1072;&#1095;&#1080;&#1090; &#1090;&#1099;&#1089;&#1103;&#1095;&#1072; &#1088;&#1072;&#1089;&#1090;&#1105;&#1090;: 4&#160;650 &#8594; 5&#160;000.';
+  } else {
+    btn.classList.add('wrong');
+    fb.className = 'check-fb err';
+    fb.textContent = '&#1057;&#1084;&#1086;&#1090;&#1088;&#1080; &#1085;&#1072; &#1094;&#1080;&#1092;&#1088;&#1091; &#1089;&#1086;&#1090;&#1077;&#1085;: 6. &#1054;&#1085;&#1072; &#8805; 5 &#8212; &#1090;&#1099;&#1089;&#1103;&#1095;&#1072; &#1087;&#1088;&#1099;&#1075;&#1072;&#1077;&#1090; &#1074;&#1074;&#1077;&#1088;&#1093;.';
+    setTimeout(function() {
+      btn.classList.remove('wrong');
+      fb.className = 'check-fb';
+      fb.textContent = '';
+    }, TIMING.wrongHint);
+  }
+}
+
+/* ── Sort ── */
+
+var SORT_CHIPS = [
+  { label: '4&#160;099', val: 4099 },
+  { label: '4&#160;100', val: 4100 },
+  { label: '3&#160;999', val: 3999 },
+  { label: '4&#160;001', val: 4001 },
+  { label: '4&#160;010', val: 4010 },
+  { label: '3&#160;998', val: 3998 }
+];
+
+var sortSelected = null;
+var sortSlotData = [];
+
+function initSort() {
+  sortSelected = null;
+  sortSlotData = [null, null, null, null, null, null];
+  document.getElementById('sortFb').innerHTML = '';
+  document.getElementById('sortCheckBtn').style.display = 'block';
+  document.getElementById('sortResetBtn').style.display = 'none';
+
+  var shuffled = shuffleArr(SORT_CHIPS.slice());
+  var slotsEl = document.getElementById('sortSlots');
+  var bankEl  = document.getElementById('sortBank');
+  slotsEl.innerHTML = '';
+  bankEl.innerHTML  = '';
+
+  var i;
+  for (i = 0; i < 6; i++) {
+    var sl = document.createElement('div');
+    sl.className = 'sort-slot';
+    sl.setAttribute('data-idx', i);
+    sl.innerHTML = '<span style="font-size:13px;color:#CCC8BF">' + (i + 1) + '</span>';
+    sl.onclick = (function(el) { return function() { sortSlotTap(el); }; })(sl);
+    slotsEl.appendChild(sl);
+  }
+
+  for (i = 0; i < shuffled.length; i++) {
+    var ch = document.createElement('button');
+    ch.className = 'sort-chip';
+    ch.innerHTML = shuffled[i].label;
+    ch.setAttribute('data-val', shuffled[i].val);
+    ch.onclick = (function(el) { return function() { sortChipTap(el); }; })(ch);
+    bankEl.appendChild(ch);
+  }
+}
+
+function sortChipTap(btn) {
+  if (sortSelected && sortSelected === btn) {
+    btn.classList.remove('sel');
+    sortSelected = null;
+    return;
+  }
+  var chips = document.getElementById('sortBank').querySelectorAll('.sort-chip');
+  var i;
+  for (i = 0; i < chips.length; i++) { chips[i].classList.remove('sel'); }
+  btn.classList.add('sel');
+  sortSelected = btn;
+}
+
+function sortSlotTap(slot) {
+  sortAttempted = true;
+  tryMarkDone();
+  var idx = parseInt(slot.getAttribute('data-idx'), 10);
+
+  if (!sortSelected && slot.classList.contains('filled')) {
+    var val = parseInt(slot.getAttribute('data-val'), 10);
+    sortSlotData[idx] = null;
+    slot.className = 'sort-slot';
+    slot.removeAttribute('data-val');
+    slot.innerHTML = '<span style="font-size:13px;color:#CCC8BF">' + (idx + 1) + '</span>';
+    var chips = document.getElementById('sortBank').querySelectorAll('.sort-chip');
+    var i;
+    for (i = 0; i < chips.length; i++) {
+      if (parseInt(chips[i].getAttribute('data-val'), 10) === val) {
+        chips[i].classList.remove('placed');
+        break;
+      }
+    }
+    return;
+  }
+
+  if (!sortSelected) return;
+
+  if (slot.classList.contains('filled')) {
+    var prevVal = parseInt(slot.getAttribute('data-val'), 10);
+    var bankChips = document.getElementById('sortBank').querySelectorAll('.sort-chip');
+    var bi;
+    for (bi = 0; bi < bankChips.length; bi++) {
+      if (parseInt(bankChips[bi].getAttribute('data-val'), 10) === prevVal && bankChips[bi].classList.contains('placed')) {
+        bankChips[bi].classList.remove('placed');
+        break;
+      }
+    }
+  }
+
+  var chipVal = parseInt(sortSelected.getAttribute('data-val'), 10);
+  sortSlotData[idx] = chipVal;
+  slot.className = 'sort-slot filled';
+  slot.setAttribute('data-val', chipVal);
+  slot.innerHTML = sortSelected.innerHTML;
+
+  sortSelected.classList.add('placed');
+  sortSelected.classList.remove('sel');
+  sortSelected = null;
+}
+
+function sortCheck() {
+  var fb = document.getElementById('sortFb');
+  var i;
+  for (i = 0; i < sortSlotData.length; i++) {
+    if (sortSlotData[i] === null) {
+      fb.innerHTML = '&#1056;&#1072;&#1089;&#1089;&#1090;&#1072;&#1074;&#1100; &#1074;&#1089;&#1077; &#1095;&#1080;&#1089;&#1083;&#1072; &#1087;&#1086; &#1089;&#1083;&#1086;&#1090;&#1072;&#1084;, &#1079;&#1072;&#1090;&#1077;&#1084; &#1087;&#1088;&#1086;&#1074;&#1077;&#1088;&#1103;&#1081;.';
+      fb.style.color = '#888';
+      return;
+    }
+  }
+  var correct = true;
+  for (i = 0; i < sortSlotData.length - 1; i++) {
+    if (sortSlotData[i] >= sortSlotData[i + 1]) { correct = false; break; }
+  }
+
+  var slots = document.getElementById('sortSlots').querySelectorAll('.sort-slot');
+  if (correct) {
+    for (i = 0; i < slots.length; i++) { slots[i].className = 'sort-slot correct'; }
+    fb.innerHTML = '&#10003; &#1042;&#1077;&#1088;&#1085;&#1086;! &#1063;&#1080;&#1089;&#1083;&#1072; &#1088;&#1072;&#1089;&#1089;&#1090;&#1072;&#1074;&#1083;&#1077;&#1085;&#1099; &#1087;&#1086; &#1074;&#1086;&#1079;&#1088;&#1072;&#1089;&#1090;&#1072;&#1085;&#1080;&#1102;.';
+    fb.style.color = '#16A34A';
+    document.getElementById('sortCheckBtn').style.display = 'none';
+    document.getElementById('sortResetBtn').style.display = 'block';
+  } else {
+    fb.innerHTML = '&#1053;&#1077; &#1089;&#1086;&#1074;&#1089;&#1077;&#1084;. &#1057;&#1088;&#1072;&#1074;&#1085;&#1080;&#1074;&#1072;&#1081; &#1087;&#1086;&#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1085;&#1086; &#1089;&#1083;&#1077;&#1074;&#1072; &#1085;&#1072;&#1087;&#1088;&#1072;&#1074;&#1086;.';
+    fb.style.color = '#B91C1C';
+    document.getElementById('sortResetBtn').style.display = 'block';
+  }
+}
+
+/* ── Round table ── */
+
+var ROUND_TASKS = [
+  { label: '&#1054;&#1082;&#1088;&#1091;&#1075;&#1083;&#1080; 6&#160;500 &#1076;&#1086; &#1090;&#1099;&#1089;&#1103;&#1095;', correct: 1 },
+  { label: '&#1054;&#1082;&#1088;&#1091;&#1075;&#1083;&#1080; 7&#160;499 &#1076;&#1086; &#1090;&#1099;&#1089;&#1103;&#1095;', correct: 0 },
+  { label: '&#1054;&#1082;&#1088;&#1091;&#1075;&#1083;&#1080; 8&#160;050 &#1076;&#1086; &#1090;&#1099;&#1089;&#1103;&#1095;', correct: 2 },
+  { label: '&#1054;&#1082;&#1088;&#1091;&#1075;&#1083;&#1080; 6&#160;490 &#1076;&#1086; &#1090;&#1099;&#1089;&#1103;&#1095;', correct: 0 },
+  { label: '&#1054;&#1082;&#1088;&#1091;&#1075;&#1083;&#1080; 8&#160;950 &#1076;&#1086; &#1090;&#1099;&#1089;&#1103;&#1095;', correct: 3 }
+];
+var ROUND_OPTS = ['6&#160;000', '7&#160;000', '8&#160;000', '9&#160;000'];
+var roundSel = [];
+var roundDone = false;
+
+function initRound() {
+  roundSel = [null, null, null, null, null];
+  roundDone = false;
+  document.getElementById('roundFb').innerHTML = '';
+  document.getElementById('roundCheckBtn').style.display = 'block';
+  document.getElementById('roundResetBtn').style.display = 'none';
+
+  var tbody = document.getElementById('roundBody');
+  var html = '';
+  var i, j;
+  for (i = 0; i < ROUND_TASKS.length; i++) {
+    html += '<tr><td class="task-cell">' + ROUND_TASKS[i].label + '</td>';
+    for (j = 0; j < ROUND_OPTS.length; j++) {
+      html += '<td><button class="round-opt-btn" data-row="' + i + '" data-col="' + j + '" onclick="roundPick(this,' + i + ',' + j + ')">' + ROUND_OPTS[j] + '</button></td>';
+    }
+    html += '</tr>';
+  }
+  tbody.innerHTML = html;
+}
+
+function roundPick(btn, row, col) {
+  if (roundDone) return;
+  roundAttempted = true;
+  tryMarkDone();
+  roundSel[row] = col;
+  var allBtns = document.getElementById('roundBody').querySelectorAll('[data-row="' + row + '"]');
+  var i;
+  for (i = 0; i < allBtns.length; i++) {
+    allBtns[i].className = (parseInt(allBtns[i].getAttribute('data-col'), 10) === col) ? 'round-opt-btn sel' : 'round-opt-btn';
+  }
+}
+
+function roundCheck() {
+  var fb = document.getElementById('roundFb');
+  var i, j;
+  var allFilled = true;
+  for (i = 0; i < ROUND_TASKS.length; i++) {
+    if (roundSel[i] === null) { allFilled = false; break; }
+  }
+  if (!allFilled) {
+    fb.innerHTML = '&#1054;&#1090;&#1074;&#1077;&#1090;&#1100; &#1085;&#1072; &#1074;&#1089;&#1077; &#1089;&#1090;&#1088;&#1086;&#1095;&#1082;&#1080;.';
+    fb.style.color = '#888';
+    return;
+  }
+
+  var correct = 0;
+  var allBtns = document.getElementById('roundBody').querySelectorAll('.round-opt-btn');
+  for (i = 0; i < allBtns.length; i++) { allBtns[i].classList.add('dis'); allBtns[i].classList.remove('sel'); }
+
+  for (i = 0; i < ROUND_TASKS.length; i++) {
+    var rowBtns = document.getElementById('roundBody').querySelectorAll('[data-row="' + i + '"]');
+    var chosen = roundSel[i];
+    var ok = (chosen === ROUND_TASKS[i].correct);
+    if (ok) correct++;
+    for (j = 0; j < rowBtns.length; j++) {
+      var col = parseInt(rowBtns[j].getAttribute('data-col'), 10);
+      if (col === ROUND_TASKS[i].correct) { rowBtns[j].className = 'round-opt-btn ok'; }
+      else if (col === chosen) { rowBtns[j].className = 'round-opt-btn err'; }
+    }
+  }
+
+  roundDone = true;
+  document.getElementById('roundCheckBtn').style.display = 'none';
+  document.getElementById('roundResetBtn').style.display = 'block';
+  if (correct === ROUND_TASKS.length) {
+    fb.innerHTML = '&#10003; &#1054;&#1090;&#1083;&#1080;&#1095;&#1085;&#1086;! &#1042;&#1089;&#1077; &#1087;&#1103;&#1090;&#1100; &#1074;&#1077;&#1088;&#1085;&#1086;.';
+    fb.style.color = '#16A34A';
+  } else {
+    fb.innerHTML = correct + ' &#1080;&#1079; ' + ROUND_TASKS.length + ' &#1074;&#1077;&#1088;&#1085;&#1086;. &#1047;&#1077;&#1083;&#1105;&#1085;&#1099;&#1084; &#1074;&#1099;&#1076;&#1077;&#1083;&#1077;&#1085;&#1099; &#1087;&#1088;&#1072;&#1074;&#1080;&#1083;&#1100;&#1085;&#1099;&#1077; &#1086;&#1090;&#1074;&#1077;&#1090;&#1099;.';
+    fb.style.color = '#C47C1A';
+  }
+}
+
+/* ── Reading quiz ── */
+
+var READ_QS = [
+  { q: '&#1050;&#1072;&#1082;&#1086;&#1081; &#1080;&#1079; &#1088;&#1077;&#1081;&#1089;&#1086;&#1074; &#1083;&#1077;&#1090;&#1080;&#1090; &#1074;&#1099;&#1096;&#1077; &#1074;&#1089;&#1077;&#1093;?',
+    opts: [
+      { text: 'SU&#160;101 &#8212; 8&#160;500 &#1084;', correct: false },
+      { text: 'SU&#160;202 &#8212; 9&#160;050 &#1084;', correct: false },
+      { text: 'SU&#160;303 &#8212; 11&#160;000 &#1084;', correct: true },
+      { text: '&#1042;&#1089;&#1077; &#1085;&#1072; &#1086;&#1076;&#1085;&#1086;&#1081; &#1074;&#1099;&#1089;&#1086;&#1090;&#1077;', correct: false }
+    ]
+  },
+  { q: '&#1044;&#1080;&#1089;&#1087;&#1077;&#1090;&#1095;&#1077;&#1088; &#1086;&#1082;&#1088;&#1091;&#1075;&#1083;&#1080;&#1083; 9&#160;050 &#1076;&#1086; &#1090;&#1099;&#1089;&#1103;&#1095;. &#1063;&#1090;&#1086; &#1087;&#1086;&#1083;&#1091;&#1095;&#1080;&#1083;&#1086;&#1089;&#1100;?',
+    opts: [
+      { text: '9&#160;000', correct: true },
+      { text: '10&#160;000', correct: false },
+      { text: '9&#160;100', correct: false },
+      { text: '9&#160;500', correct: false }
+    ]
+  },
+  { q: '&#1050;&#1072;&#1082;&#1086;&#1081; &#1088;&#1077;&#1081;&#1089; &#1083;&#1077;&#1090;&#1080;&#1090; &#1074;&#1099;&#1096;&#1077;: SU&#160;101 &#1080;&#1083;&#1080; SU&#160;202?',
+    opts: [
+      { text: 'SU&#160;101 &#8212; &#1090;&#1072;&#1084; &#1077;&#1089;&#1090;&#1100; &#1094;&#1080;&#1092;&#1088;&#1099; 8 &#1080; 5', correct: false },
+      { text: 'SU&#160;202 &#8212; &#1074; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1077; &#1090;&#1099;&#1089;&#1103;&#1095; 9 &gt; 8', correct: true },
+      { text: '&#1054;&#1085;&#1080; &#1086;&#1076;&#1080;&#1085;&#1072;&#1082;&#1086;&#1074;&#1099;&#1077;', correct: false },
+      { text: '&#1053;&#1077;&#1083;&#1100;&#1079;&#1103; &#1089;&#1088;&#1072;&#1074;&#1085;&#1080;&#1090;&#1100; &#1073;&#1077;&#1079; &#1074;&#1099;&#1095;&#1080;&#1090;&#1072;&#1085;&#1080;&#1103;', correct: false }
+    ]
+  }
+];
+
+function initRead() {
+  var wrap = document.getElementById('readQs');
+  var i;
+  for (i = 0; i < READ_QS.length; i++) {
+    (function(q, idx) {
+      var items = shuffleArr(q.opts.slice());
+      var opts = '';
+      var k;
+      for (k = 0; k < items.length; k++) {
+        opts += '<button class="read-opt" data-correct="' + items[k].correct + '" onclick="rdAns(this,' + idx + ')">' + items[k].text + '</button>';
+      }
+      var el = document.createElement('div');
+      el.innerHTML = '<div class="read-q-t">' + (idx + 1) + '. ' + q.q + '</div><div class="read-opts">' + opts + '</div>';
+      wrap.appendChild(el);
+    })(READ_QS[i], i);
+  }
+}
+
+function rdAns(btn, qi) {
+  if (!readAnswered[qi]) {
+    readAnswered[qi] = true;
+    readCount++;
+    if (readCount >= READ_QS.length) { readAttempted = true; tryMarkDone(); }
+  }
+  var ok = btn.getAttribute('data-correct') === 'true';
+  var opts = btn.closest('.read-opts').querySelectorAll('.read-opt');
+  var i;
+  for (i = 0; i < opts.length; i++) { opts[i].style.pointerEvents = 'none'; }
+  btn.classList.add(ok ? 'correct' : 'wrong');
+  if (!ok) {
+    for (i = 0; i < opts.length; i++) {
+      if (opts[i].getAttribute('data-correct') === 'true') { opts[i].classList.add('correct'); }
+    }
+  }
+}
+
+/* ── Данные контента ── */
+
+var GLOSSARY = [
+  { term: '&#1057;&#1088;&#1072;&#1074;&#1085;&#1077;&#1085;&#1080;&#1077; &#1095;&#1080;&#1089;&#1077;&#1083;', def: '&#1054;&#1087;&#1088;&#1077;&#1076;&#1077;&#1083;&#1077;&#1085;&#1080;&#1077;, &#1082;&#1072;&#1082;&#1086;&#1077; &#1080;&#1079; &#1076;&#1074;&#1091;&#1093; &#1095;&#1080;&#1089;&#1077;&#1083; &#1073;&#1086;&#1083;&#1100;&#1096;&#1077;, &#1084;&#1077;&#1085;&#1100;&#1096;&#1077; &#1080;&#1083;&#1080; &#1086;&#1085;&#1080; &#1088;&#1072;&#1074;&#1085;&#1099;. &#1055;&#1088;&#1080;&#1084;&#1077;&#1088;: <em>7&#160;485 &gt; 7&#160;399</em>, &#1087;&#1086;&#1090;&#1086;&#1084;&#1091; &#1095;&#1090;&#1086; &#1074; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1077; &#1089;&#1086;&#1090;&#1077;&#1085; 4 &gt; 3.' },
+  { term: '&#1047;&#1085;&#1072;&#1082;&#1080; &#1089;&#1088;&#1072;&#1074;&#1085;&#1077;&#1085;&#1080;&#1103;', def: '&#1057;&#1080;&#1084;&#1074;&#1086;&#1083;&#1099; &gt;, &lt;, = &#1076;&#1083;&#1103; &#1079;&#1072;&#1087;&#1080;&#1089;&#1080; &#1088;&#1077;&#1079;&#1091;&#1083;&#1100;&#1090;&#1072;&#1090;&#1072; &#1089;&#1088;&#1072;&#1074;&#1085;&#1077;&#1085;&#1080;&#1103;. &#1055;&#1088;&#1080;&#1084;&#1077;&#1088;: <em>5 &lt; 8; 12 &gt; 9; 7 = 7</em>. &#1054;&#1089;&#1090;&#1088;&#1099;&#1081; &#1091;&#1075;&#1086;&#1083; &#1089;&#1084;&#1086;&#1090;&#1088;&#1080;&#1090; &#1085;&#1072; &#1084;&#1077;&#1085;&#1100;&#1096;&#1077;&#1077;.' },
+  { term: '&#1054;&#1082;&#1088;&#1091;&#1075;&#1083;&#1077;&#1085;&#1080;&#1077;', def: '&#1047;&#1072;&#1084;&#1077;&#1085;&#1072; &#1095;&#1080;&#1089;&#1083;&#1072; &#1073;&#1083;&#1080;&#1078;&#1072;&#1081;&#1096;&#1080;&#1084; &#1079;&#1085;&#1072;&#1095;&#1077;&#1085;&#1080;&#1077;&#1084; &#1074;&#1099;&#1073;&#1088;&#1072;&#1085;&#1085;&#1086;&#1075;&#1086; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1072;. &#1055;&#1088;&#1080;&#1084;&#1077;&#1088;: <em>347 &#8594; 350</em> (&#1076;&#1086; &#1076;&#1077;&#1089;&#1103;&#1090;&#1082;&#1086;&#1074;), <em>347 &#8594; 300</em> (&#1076;&#1086; &#1089;&#1086;&#1090;&#1077;&#1085;).' },
+  { term: '&#1056;&#1072;&#1079;&#1088;&#1103;&#1076; &#1086;&#1082;&#1088;&#1091;&#1075;&#1083;&#1077;&#1085;&#1080;&#1103;', def: '&#1056;&#1072;&#1079;&#1088;&#1103;&#1076;, &#1076;&#1086; &#1082;&#1086;&#1090;&#1086;&#1088;&#1086;&#1075;&#1086; &#1086;&#1082;&#1088;&#1091;&#1075;&#1083;&#1103;&#1077;&#1084;: &#1077;&#1076;&#1080;&#1085;&#1080;&#1094;&#1099;, &#1076;&#1077;&#1089;&#1103;&#1090;&#1082;&#1080;, &#1089;&#1086;&#1090;&#1085;&#1080;, &#1090;&#1099;&#1089;&#1103;&#1095;&#1080;. &#1055;&#1088;&#1080;&#1084;&#1077;&#1088;: &#1086;&#1082;&#1088;&#1091;&#1075;&#1083;&#1080;&#1090;&#1100; 3&#160;748 &#1076;&#1086; &#1089;&#1086;&#1090;&#1077;&#1085; &#8212; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076; &#1086;&#1082;&#1088;&#1091;&#1075;&#1083;&#1077;&#1085;&#1080;&#1103; &#1089;&#1086;&#1090;&#1085;&#1080;.' },
+  { term: '&#1055;&#1088;&#1080;&#1073;&#1083;&#1080;&#1078;&#1105;&#1085;&#1085;&#1086;&#1077; &#1079;&#1085;&#1072;&#1095;&#1077;&#1085;&#1080;&#1077;', def: '&#1056;&#1077;&#1079;&#1091;&#1083;&#1100;&#1090;&#1072;&#1090; &#1086;&#1082;&#1088;&#1091;&#1075;&#1083;&#1077;&#1085;&#1080;&#1103; &#8212; &#1095;&#1080;&#1089;&#1083;&#1086;, &#1073;&#1083;&#1080;&#1079;&#1082;&#1086;&#1077; &#1082; &#1080;&#1089;&#1093;&#1086;&#1076;&#1085;&#1086;&#1084;&#1091;, &#1085;&#1086; &#1091;&#1076;&#1086;&#1073;&#1085;&#1086;&#1077; &#1076;&#1083;&#1103; &#1079;&#1072;&#1087;&#1080;&#1089;&#1080;. &#1055;&#1088;&#1080;&#1084;&#1077;&#1088;: &#1069;&#1074;&#1077;&#1088;&#1077;&#1089;&#1090; &#8212; &#1086;&#1082;&#1086;&#1083;&#1086; <em>8&#160;849 &#1084;&#1077;&#1090;&#1088;&#1086;&#1074;</em> (&#1087;&#1088;&#1080;&#1073;&#1083;&#1080;&#1078;&#1105;&#1085;&#1085;&#1086;).' },
+  { term: '&#1047;&#1085;&#1072;&#1082; &#8776;', def: '&#1047;&#1085;&#1072;&#1082; «&#1087;&#1088;&#1080;&#1073;&#1083;&#1080;&#1078;&#1105;&#1085;&#1085;&#1086; &#1088;&#1072;&#1074;&#1085;&#1086;» &#8212; &#1080;&#1089;&#1087;&#1086;&#1083;&#1100;&#1079;&#1091;&#1077;&#1090;&#1089;&#1103; &#1087;&#1088;&#1080; &#1079;&#1072;&#1087;&#1080;&#1089;&#1080; &#1088;&#1077;&#1079;&#1091;&#1083;&#1100;&#1090;&#1072;&#1090;&#1072; &#1086;&#1082;&#1088;&#1091;&#1075;&#1083;&#1077;&#1085;&#1080;&#1103;. &#1055;&#1088;&#1080;&#1084;&#1077;&#1088;: <em>3&#160;748 &#8776; 3&#160;700</em>.' }
+];
+
+var MISCONCEPTIONS = [
+  { imgId: 'node3_img3', imgRatio: '3/2', hasImg: false,
+    imgDesc: '&#1056;&#1077;&#1073;&#1105;&#1085;&#1086;&#1082; &#1091; &#1076;&#1086;&#1089;&#1082;&#1080; &#1085;&#1072;&#1087;&#1080;&#1089;&#1072;&#1083;: 3&#160;099 &gt; 3&#160;100 &#8212; &#1080; &#1091;&#1074;&#1077;&#1088;&#1077;&#1085;&#1085;&#1086; &#1089;&#1084;&#1086;&#1090;&#1088;&#1080;&#1090; &#1085;&#1072; &#1091;&#1095;&#1080;&#1090;&#1077;&#1083;&#1103;',
+    label: '&#1050;&#1090;&#1086; &#1073;&#1086;&#1083;&#1100;&#1096;&#1077;: 3&#160;099 &#1080;&#1083;&#1080; 3&#160;100?',
+    wrong: '«3&#160;099 &#1073;&#1086;&#1083;&#1100;&#1096;&#1077;, &#1095;&#1077;&#1084; 3&#160;100 &#8212; &#1074;&#1077;&#1076;&#1100; 9 &#1073;&#1086;&#1083;&#1100;&#1096;&#1077;, &#1095;&#1077;&#1084; 1»',
+    whyWrong: '&#1056;&#1077;&#1073;&#1105;&#1085;&#1086;&#1082; &#1089;&#1088;&#1072;&#1074;&#1085;&#1080;&#1074;&#1072;&#1077;&#1090; &#1087;&#1077;&#1088;&#1074;&#1099;&#1077; &#1074;&#1089;&#1090;&#1088;&#1077;&#1095;&#1077;&#1085;&#1085;&#1099;&#1077; &#1088;&#1072;&#1079;&#1083;&#1080;&#1095;&#1072;&#1102;&#1097;&#1080;&#1077;&#1089;&#1103; &#1094;&#1080;&#1092;&#1088;&#1099; (9 &#1080; 1 &#1074; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1077; &#1076;&#1077;&#1089;&#1103;&#1090;&#1082;&#1086;&#1074;), &#1085;&#1077; &#1091;&#1095;&#1080;&#1090;&#1099;&#1074;&#1072;&#1103;, &#1095;&#1090;&#1086; &#1089;&#1085;&#1072;&#1095;&#1072;&#1083;&#1072; &#1085;&#1091;&#1078;&#1085;&#1086; &#1089;&#1088;&#1072;&#1074;&#1085;&#1080;&#1090;&#1100; &#1073;&#1086;&#1083;&#1077;&#1077; &#1074;&#1099;&#1089;&#1086;&#1082;&#1080;&#1081; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076; &#8212; &#1089;&#1086;&#1090;&#1085;&#1080;.',
+    correct: '&#1057;&#1088;&#1072;&#1074;&#1085;&#1080;&#1074;&#1072;&#1102;&#1090; &#1087;&#1086;&#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1085;&#1086;, &#1085;&#1072;&#1095;&#1080;&#1085;&#1072;&#1103; &#1089; &#1085;&#1072;&#1080;&#1073;&#1086;&#1083;&#1100;&#1096;&#1077;&#1075;&#1086; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1072;. &#1059; 3&#160;099 &#1080; 3&#160;100 &#1090;&#1099;&#1089;&#1103;&#1095;&#1080; &#1086;&#1076;&#1080;&#1085;&#1072;&#1082;&#1086;&#1074;&#1099;&#1077; (3). &#1057;&#1084;&#1086;&#1090;&#1088;&#1080;&#1084; &#1085;&#1072; &#1089;&#1086;&#1090;&#1085;&#1080;: &#1091; 3&#160;099 &#8212; 0 &#1089;&#1086;&#1090;&#1077;&#1085;, &#1091; 3&#160;100 &#8212; &#1086;&#1076;&#1085;&#1072; &#1089;&#1086;&#1090;&#1085;&#1103;. 1 &gt; 0, &#1079;&#1085;&#1072;&#1095;&#1080;&#1090; 3&#160;100 &gt; 3&#160;099, &#1076;&#1072;&#1078;&#1077; &#1085;&#1077;&#1089;&#1084;&#1086;&#1090;&#1088;&#1103; &#1085;&#1072; 9 &#1074; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1077; &#1076;&#1077;&#1089;&#1103;&#1090;&#1082;&#1086;&#1074;.',
+    hint: '&#1057;&#1088;&#1072;&#1074;&#1085;&#1080;&#1074;&#1072;&#1077;&#1096;&#1100; &#1089;&#1083;&#1077;&#1074;&#1072; &#1085;&#1072;&#1087;&#1088;&#1072;&#1074;&#1086; &#8212; &#1082;&#1072;&#1082; &#1095;&#1080;&#1090;&#1072;&#1077;&#1096;&#1100;. &#1053;&#1072;&#1096;&#1105;&#1083; &#1087;&#1077;&#1088;&#1074;&#1099;&#1081; &#1088;&#1072;&#1079;&#1083;&#1080;&#1095;&#1072;&#1102;&#1097;&#1080;&#1081;&#1089;&#1103; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076; &#8212; &#1086;&#1085; &#1080; &#1088;&#1077;&#1096;&#1072;&#1077;&#1090;.'
+  },
+  { imgId: 'node3_img4', imgRatio: '3/2', hasImg: false,
+    imgDesc: '&#1044;&#1074;&#1072; &#1094;&#1077;&#1085;&#1085;&#1080;&#1082;&#1072;: 4&#160;490 &#1088;&#1091;&#1073;. &#1079;&#1072;&#1095;&#1077;&#1088;&#1082;&#1085;&#1091;&#1090;&#1086;, &#1088;&#1103;&#1076;&#1086;&#1084; 4&#160;500 &#1088;&#1091;&#1073;. &#1089; &#1091;&#1083;&#1099;&#1073;&#1072;&#1102;&#1097;&#1080;&#1084;&#1089;&#1103; &#1083;&#1080;&#1094;&#1086;&#1084; &#8212; «&#1089;&#1082;&#1080;&#1076;&#1082;&#1072;»',
+    label: '&#1054;&#1082;&#1088;&#1091;&#1075;&#1083;&#1077;&#1085;&#1080;&#1077; &#1074;&#1089;&#1077;&#1075;&#1076;&#1072; &#1091;&#1084;&#1077;&#1085;&#1100;&#1096;&#1072;&#1077;&#1090; &#1095;&#1080;&#1089;&#1083;&#1086;?',
+    wrong: '«&#1054;&#1082;&#1088;&#1091;&#1075;&#1083;&#1105;&#1085;&#1085;&#1086;&#1077; &#1095;&#1080;&#1089;&#1083;&#1086; &#1074;&#1089;&#1077;&#1075;&#1076;&#1072; &#1084;&#1077;&#1085;&#1100;&#1096;&#1077; &#8212; &#1084;&#1099; &#1078;&#1077; &#1095;&#1090;&#1086;-&#1090;&#1086; &#1086;&#1090;&#1073;&#1088;&#1072;&#1089;&#1099;&#1074;&#1072;&#1077;&#1084;»',
+    whyWrong: '&#1057;&#1083;&#1086;&#1074;&#1086; «&#1086;&#1090;&#1073;&#1088;&#1072;&#1089;&#1099;&#1074;&#1072;&#1077;&#1084;» &#1089;&#1086;&#1079;&#1076;&#1072;&#1105;&#1090; &#1086;&#1073;&#1088;&#1072;&#1079; &#1091;&#1084;&#1077;&#1085;&#1100;&#1096;&#1077;&#1085;&#1080;&#1103; &#8212; &#1085;&#1086; &#1085;&#1072; &#1089;&#1072;&#1084;&#1086;&#1084; &#1076;&#1077;&#1083;&#1077; &#1080;&#1085;&#1086;&#1075;&#1076;&#1072; &#1084;&#1099; &#1087;&#1088;&#1080;&#1073;&#1072;&#1074;&#1083;&#1103;&#1077;&#1084; &#1082; &#1089;&#1083;&#1077;&#1076;&#1091;&#1102;&#1097;&#1077;&#1084;&#1091; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1091;.',
+    correct: '&#1054;&#1082;&#1088;&#1091;&#1075;&#1083;&#1077;&#1085;&#1080;&#1077; &#1074;&#1099;&#1073;&#1080;&#1088;&#1072;&#1077;&#1090; &#1073;&#1083;&#1080;&#1078;&#1072;&#1081;&#1096;&#1077;&#1077; «&#1082;&#1088;&#1091;&#1075;&#1083;&#1086;&#1077;» &#1095;&#1080;&#1089;&#1083;&#1086; &#8212; &#1072; &#1086;&#1085;&#1086; &#1084;&#1086;&#1078;&#1077;&#1090; &#1073;&#1099;&#1090;&#1100; &#1080; &#1073;&#1086;&#1083;&#1100;&#1096;&#1077;, &#1080; &#1084;&#1077;&#1085;&#1100;&#1096;&#1077; &#1080;&#1089;&#1093;&#1086;&#1076;&#1085;&#1086;&#1075;&#1086;. 4&#160;650 &#8594; 5&#160;000: &#1095;&#1080;&#1089;&#1083;&#1086; &#1074;&#1099;&#1088;&#1086;&#1089;&#1083;&#1086; &#1085;&#1072; 350. &#1042;&#1089;&#1105; &#1079;&#1072;&#1074;&#1080;&#1089;&#1080;&#1090; &#1086;&#1090; &#1090;&#1086;&#1075;&#1086;, &#1074; &#1082;&#1072;&#1082;&#1091;&#1102; &#1089;&#1090;&#1086;&#1088;&#1086;&#1085;&#1091; &#1073;&#1083;&#1080;&#1078;&#1077;.',
+    hint: '&#1054;&#1082;&#1088;&#1091;&#1075;&#1083;&#1077;&#1085;&#1080;&#1077; &#8212; &#1087;&#1088;&#1099;&#1078;&#1086;&#1082; &#1082; &#1073;&#1083;&#1080;&#1078;&#1072;&#1081;&#1096;&#1077;&#1081; &#1086;&#1090;&#1084;&#1077;&#1090;&#1082;&#1077;. &#1055;&#1088;&#1099;&#1075;&#1072;&#1077;&#1096;&#1100; &#1090;&#1091;&#1076;&#1072;, &#1082;&#1091;&#1076;&#1072; &#1073;&#1083;&#1080;&#1078;&#1077; &#8212; &#1074;&#1074;&#1077;&#1088;&#1093; &#1080;&#1083;&#1080; &#1074;&#1085;&#1080;&#1079;.'
+  }
+];
+
+var REMEMBER = [
+  '&#1041;&#1086;&#1083;&#1100;&#1096;&#1077;&#1077; &#1095;&#1080;&#1089;&#1083;&#1086; &#8212; &#1087;&#1088;&#1072;&#1074;&#1077;&#1077; &#1085;&#1072; &#1095;&#1080;&#1089;&#1083;&#1086;&#1074;&#1086;&#1081; &#1087;&#1088;&#1103;&#1084;&#1086;&#1081;',
+  '&#1063;&#1077;&#1090;&#1099;&#1088;&#1105;&#1093;&#1079;&#1085;&#1072;&#1095;&#1085;&#1086;&#1077; &#1095;&#1080;&#1089;&#1083;&#1086; &#1074;&#1089;&#1077;&#1075;&#1076;&#1072; &#1073;&#1086;&#1083;&#1100;&#1096;&#1077; &#1090;&#1088;&#1105;&#1093;&#1079;&#1085;&#1072;&#1095;&#1085;&#1086;&#1075;&#1086;',
+  '&#1057;&#1088;&#1072;&#1074;&#1085;&#1080;&#1074;&#1072;&#1102;&#1090; &#1087;&#1086;&#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1085;&#1086; &#1089;&#1083;&#1077;&#1074;&#1072; &#1085;&#1072;&#1087;&#1088;&#1072;&#1074;&#1086; &#8212; &#1087;&#1077;&#1088;&#1074;&#1099;&#1081; &#1088;&#1072;&#1079;&#1083;&#1080;&#1095;&#1072;&#1102;&#1097;&#1080;&#1081;&#1089;&#1103; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076; &#1088;&#1077;&#1096;&#1072;&#1077;&#1090;',
+  '&#1047;&#1085;&#1072;&#1082;&#1080;: &gt; (&#1073;&#1086;&#1083;&#1100;&#1096;&#1077;), &lt; (&#1084;&#1077;&#1085;&#1100;&#1096;&#1077;). &#1054;&#1089;&#1090;&#1088;&#1099;&#1081; &#1091;&#1075;&#1086;&#1083; &#1089;&#1084;&#1086;&#1090;&#1088;&#1080;&#1090; &#1085;&#1072; &#1084;&#1077;&#1085;&#1100;&#1096;&#1077;&#1077; &#1095;&#1080;&#1089;&#1083;&#1086;',
+  '&#1054;&#1082;&#1088;&#1091;&#1075;&#1083;&#1077;&#1085;&#1080;&#1077;: &#1089;&#1084;&#1086;&#1090;&#1088;&#1080; &#1085;&#1072; &#1094;&#1080;&#1092;&#1088;&#1091; &#1089;&#1083;&#1077;&#1076;&#1091;&#1102;&#1097;&#1077;&#1075;&#1086; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1072;. &#8805; 5 &#8212; &#1074;&#1074;&#1077;&#1088;&#1093;, &lt; 5 &#8212; &#1074;&#1085;&#1080;&#1079;',
+  '&#1054;&#1082;&#1088;&#1091;&#1075;&#1083;&#1105;&#1085;&#1085;&#1086;&#1077; &#1095;&#1080;&#1089;&#1083;&#1086; &#1084;&#1086;&#1078;&#1077;&#1090; &#1073;&#1099;&#1090;&#1100; &#1080; &#1073;&#1086;&#1083;&#1100;&#1096;&#1077;, &#1080; &#1084;&#1077;&#1085;&#1100;&#1096;&#1077; &#1080;&#1089;&#1093;&#1086;&#1076;&#1085;&#1086;&#1075;&#1086;',
+  '&#1047;&#1085;&#1072;&#1082; &#8776; &#1086;&#1079;&#1085;&#1072;&#1095;&#1072;&#1077;&#1090; «&#1087;&#1088;&#1080;&#1073;&#1083;&#1080;&#1078;&#1105;&#1085;&#1085;&#1086; &#1088;&#1072;&#1074;&#1085;&#1086;»'
+];
+
+var SELFCHECK = [
+  '&#1050;&#1072;&#1082;&#1086;&#1077; &#1095;&#1080;&#1089;&#1083;&#1086; &#1073;&#1086;&#1083;&#1100;&#1096;&#1077;: 5&#160;099 &#1080;&#1083;&#1080; 5&#160;100? &#1054;&#1073;&#1098;&#1103;&#1089;&#1085;&#1080; &#1073;&#1077;&#1079; &#1074;&#1099;&#1095;&#1080;&#1089;&#1083;&#1077;&#1085;&#1080;&#1081;.',
+  '&#1054;&#1082;&#1088;&#1091;&#1075;&#1083;&#1080; &#1095;&#1080;&#1089;&#1083;&#1086; 3&#160;750 &#1076;&#1086; &#1089;&#1086;&#1090;&#1077;&#1085;. &#1042; &#1082;&#1072;&#1082;&#1091;&#1102; &#1089;&#1090;&#1086;&#1088;&#1086;&#1085;&#1091; &#1087;&#1088;&#1099;&#1075;&#1085;&#1077;&#1090;?',
+  '&#1056;&#1072;&#1089;&#1089;&#1090;&#1072;&#1074;&#1100; &#1079;&#1085;&#1072;&#1082;&#1080; &gt; &#1080;&#1083;&#1080; &lt; &#1084;&#1077;&#1078;&#1076;&#1091; &#1095;&#1080;&#1089;&#1083;&#1072;&#1084;&#1080;: 7&#160;070 __ 7&#160;007',
+  '&#1053;&#1072;&#1089;&#1077;&#1083;&#1077;&#1085;&#1080;&#1077; &#1075;&#1086;&#1088;&#1086;&#1076;&#1072; &#8212; 347&#160;820 &#1095;&#1077;&#1083;&#1086;&#1074;&#1077;&#1082;. &#1054;&#1082;&#1088;&#1091;&#1075;&#1083;&#1080; &#1076;&#1086; &#1090;&#1099;&#1089;&#1103;&#1095;.',
+  '&#1055;&#1086;&#1095;&#1077;&#1084;&#1091; 3&#160;099 &lt; 3&#160;100, &#1077;&#1089;&#1083;&#1080; &#1074; 3&#160;099 &#1077;&#1089;&#1090;&#1100; &#1094;&#1080;&#1092;&#1088;&#1072; 9?'
+];
+
+var QUIZ_QS = [
+  { q: '&#1050;&#1072;&#1082;&#1086;&#1077; &#1080;&#1079; &#1095;&#1080;&#1089;&#1077;&#1083; &#1085;&#1072;&#1080;&#1073;&#1086;&#1083;&#1100;&#1096;&#1077;&#1077;?',
+    opts: ['3&#160;099', '2&#160;999', '3&#160;100', '3&#160;010'], correct: 2,
+    explain: '&#1042;&#1089;&#1077; &#1095;&#1077;&#1090;&#1099;&#1088;&#1105;&#1093;&#1079;&#1085;&#1072;&#1095;&#1085;&#1099;&#1077;, &#1090;&#1099;&#1089;&#1103;&#1095;&#1080; &#1091; &#1090;&#1088;&#1105;&#1093; &#8212; 3. &#1057;&#1084;&#1086;&#1090;&#1088;&#1080;&#1084; &#1085;&#1072; &#1089;&#1086;&#1090;&#1085;&#1080;: &#1091; 3&#160;100 &#8212; 1 &#1089;&#1086;&#1090;&#1085;&#1103;, &#1091; 3&#160;099 &#1080; 3&#160;010 &#8212; &#1085;&#1086;&#1083;&#1100;. 3&#160;100 &#1074;&#1099;&#1080;&#1075;&#1088;&#1099;&#1074;&#1072;&#1077;&#1090;.' },
+  { q: '&#1063;&#1080;&#1089;&#1083;&#1086; 4&#160;748 &#1086;&#1082;&#1088;&#1091;&#1075;&#1083;&#1080;&#1083;&#1080; &#1076;&#1086; &#1089;&#1086;&#1090;&#1077;&#1085;. &#1063;&#1090;&#1086; &#1087;&#1086;&#1083;&#1091;&#1095;&#1080;&#1083;&#1086;&#1089;&#1100;?',
+    opts: ['4&#160;700', '4&#160;800', '5&#160;000', '4&#160;750'], correct: 0,
+    explain: '&#1057;&#1084;&#1086;&#1090;&#1088;&#1080;&#1084; &#1085;&#1072; &#1094;&#1080;&#1092;&#1088;&#1091; &#1076;&#1077;&#1089;&#1103;&#1090;&#1082;&#1086;&#1074;: 4. &#1054;&#1085;&#1072; &#1084;&#1077;&#1085;&#1100;&#1096;&#1077; 5 &#8212; &#1086;&#1082;&#1088;&#1091;&#1075;&#1083;&#1103;&#1077;&#1084; &#1074;&#1085;&#1080;&#1079;: 4&#160;748 &#8776; 4&#160;700.' },
+  { q: '&#1055;&#1077;&#1090;&#1103; &#1088;&#1072;&#1089;&#1089;&#1090;&#1072;&#1074;&#1080;&#1083; &#1095;&#1080;&#1089;&#1083;&#1072; &#1087;&#1086; &#1074;&#1086;&#1079;&#1088;&#1072;&#1089;&#1090;&#1072;&#1085;&#1080;&#1102;: 901, 999, 1&#160;009, 1&#160;090. &#1042;&#1077;&#1088;&#1085;&#1086; &#1083;&#1080;?',
+    opts: ['&#1053;&#1077;&#1090; &#8212; 999 &#1073;&#1086;&#1083;&#1100;&#1096;&#1077; 1&#160;009', '&#1044;&#1072; &#8212; &#1087;&#1086;&#1088;&#1103;&#1076;&#1086;&#1082; &#1087;&#1088;&#1072;&#1074;&#1080;&#1083;&#1100;&#1085;&#1099;&#1081;', '&#1053;&#1077;&#1090; &#8212; 1&#160;090 &#1085;&#1072;&#1076;&#1086; &#1087;&#1086;&#1089;&#1090;&#1072;&#1074;&#1080;&#1090;&#1100; &#1087;&#1077;&#1088;&#1074;&#1099;&#1084;', '&#1053;&#1077;&#1090; &#8212; 901 &#1085;&#1072;&#1076;&#1086; &#1087;&#1086;&#1089;&#1090;&#1072;&#1074;&#1080;&#1090;&#1100; &#1087;&#1086;&#1089;&#1083;&#1077;&#1076;&#1085;&#1080;&#1084;'], correct: 1,
+    explain: '&#1058;&#1088;&#1105;&#1093;&#1079;&#1085;&#1072;&#1095;&#1085;&#1099;&#1077; (901, 999) &#1074;&#1089;&#1077;&#1075;&#1076;&#1072; &#1084;&#1077;&#1085;&#1100;&#1096;&#1077; &#1095;&#1077;&#1090;&#1099;&#1088;&#1105;&#1093;&#1079;&#1085;&#1072;&#1095;&#1085;&#1099;&#1093; (1&#160;009, 1&#160;090). &#1057;&#1088;&#1077;&#1076;&#1080; &#1095;&#1077;&#1090;&#1099;&#1088;&#1105;&#1093;&#1079;&#1085;&#1072;&#1095;&#1085;&#1099;&#1093;: 1&#160;009 &lt; 1&#160;090 (&#1074; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1077; &#1076;&#1077;&#1089;&#1103;&#1090;&#1082;&#1086;&#1074; 0 &lt; 9).' },
+  { q: '&#1042; &#1082;&#1072;&#1082;&#1086;&#1084; &#1089;&#1083;&#1091;&#1095;&#1072;&#1077; &#1086;&#1082;&#1088;&#1091;&#1075;&#1083;&#1077;&#1085;&#1080;&#1077; &#1091;&#1074;&#1077;&#1083;&#1080;&#1095;&#1080;&#1074;&#1072;&#1077;&#1090; &#1095;&#1080;&#1089;&#1083;&#1086;?',
+    opts: ['&#1042;&#1089;&#1077;&#1075;&#1076;&#1072;', '&#1053;&#1080;&#1082;&#1086;&#1075;&#1076;&#1072;', '&#1050;&#1086;&#1075;&#1076;&#1072; &#1094;&#1080;&#1092;&#1088;&#1072; &#1089;&#1083;&#1077;&#1076;&#1091;&#1102;&#1097;&#1077;&#1075;&#1086; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1072; &#8805; 5', '&#1050;&#1086;&#1075;&#1076;&#1072; &#1095;&#1080;&#1089;&#1083;&#1086; &#1095;&#1077;&#1090;&#1085;&#1086;&#1077;'], correct: 2,
+    explain: '&#1045;&#1089;&#1083;&#1080; &#1094;&#1080;&#1092;&#1088;&#1072; &#1089;&#1083;&#1077;&#1076;&#1091;&#1102;&#1097;&#1077;&#1075;&#1086; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1072; &#8805; 5 &#8212; &#1087;&#1088;&#1080;&#1073;&#1072;&#1074;&#1083;&#1103;&#1077;&#1084; 1 &#1082; &#1090;&#1077;&#1082;&#1091;&#1097;&#1077;&#1084;&#1091; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1091;, &#1095;&#1080;&#1089;&#1083;&#1086; &#1088;&#1072;&#1089;&#1090;&#1105;&#1090;. &#1053;&#1072;&#1087;&#1088;&#1080;&#1084;&#1077;&#1088;, 4&#160;650 &#8594; 5&#160;000.' },
+  { q: '&#1053;&#1072; &#1089;&#1082;&#1083;&#1072;&#1076;&#1077; 4&#160;835 &#1082;&#1086;&#1088;&#1086;&#1073;&#1086;&#1082;. &#1044;&#1080;&#1088;&#1077;&#1082;&#1090;&#1086;&#1088; &#1093;&#1086;&#1095;&#1077;&#1090; &#1089;&#1082;&#1072;&#1079;&#1072;&#1090;&#1100; «&#1086;&#1082;&#1086;&#1083;&#1086; &#1087;&#1103;&#1090;&#1080; &#1090;&#1099;&#1089;&#1103;&#1095;». &#1050;&#1072;&#1082;&#1086;&#1077; &#1086;&#1082;&#1088;&#1091;&#1075;&#1083;&#1077;&#1085;&#1080;&#1077; &#1085;&#1091;&#1078;&#1085;&#1086;?',
+    opts: ['&#1044;&#1086; &#1076;&#1077;&#1089;&#1103;&#1090;&#1082;&#1086;&#1074; &#8594; 4&#160;840', '&#1044;&#1086; &#1089;&#1086;&#1090;&#1077;&#1085; &#8594; 4&#160;800', '&#1044;&#1086; &#1090;&#1099;&#1089;&#1103;&#1095; &#8594; 5&#160;000', '&#1044;&#1086; &#1076;&#1077;&#1089;&#1103;&#1090;&#1082;&#1086;&#1074; &#1090;&#1099;&#1089;&#1103;&#1095; &#8594; 0'], correct: 2,
+    explain: '&#1062;&#1080;&#1092;&#1088;&#1072; &#1089;&#1086;&#1090;&#1077;&#1085; &#1074; 4&#160;835 &#8212; &#1101;&#1090;&#1086; 8, &#1086;&#1085;&#1072; &#8805; 5, &#1079;&#1085;&#1072;&#1095;&#1080;&#1090; &#1090;&#1099;&#1089;&#1103;&#1095;&#1080; &#1086;&#1082;&#1088;&#1091;&#1075;&#1083;&#1103;&#1102;&#1090;&#1089;&#1103; &#1074;&#1074;&#1077;&#1088;&#1093;: 4&#160;835 &#8776; 5&#160;000.' }
+];
+
+var DYK = [
+  { tag: '&#1048;&#1089;&#1090;&#1086;&#1088;&#1080;&#1103;',
+    title: '&#1050;&#1072;&#1082; &#1089;&#1088;&#1072;&#1074;&#1085;&#1080;&#1074;&#1072;&#1083;&#1080; &#1095;&#1080;&#1089;&#1083;&#1072; &#1076;&#1086; &#1085;&#1072;&#1096;&#1077;&#1081; &#1101;&#1088;&#1099;',
+    teaser: '&#1044;&#1088;&#1077;&#1074;&#1085;&#1080;&#1077; &#1077;&#1075;&#1080;&#1087;&#1090;&#1103;&#1085;&#1077; &#1089;&#1088;&#1072;&#1074;&#1085;&#1080;&#1074;&#1072;&#1083;&#1080; &#1095;&#1080;&#1089;&#1083;&#1072; &#1087;&#1086; &#1082;&#1086;&#1083;&#1080;&#1095;&#1077;&#1089;&#1090;&#1074;&#1091; &#1079;&#1085;&#1072;&#1082;&#1086;&#1074; &#8212; &#1080; &#1101;&#1090;&#1086; &#1088;&#1072;&#1073;&#1086;&#1090;&#1072;&#1083;&#1086;',
+    imgId: 'node3_img5', hasImg: false,
+    imgDesc: '&#1045;&#1075;&#1080;&#1087;&#1077;&#1090;&#1089;&#1082;&#1080;&#1081; &#1087;&#1080;&#1089;&#1077;&#1094; &#1089; &#1087;&#1072;&#1087;&#1080;&#1088;&#1091;&#1089;&#1086;&#1084; &#1080; &#1089;&#1095;&#1077;&#1090;&#1085;&#1099;&#1084;&#1080; &#1079;&#1085;&#1072;&#1082;&#1072;&#1084;&#1080; &#8212; &#1080;&#1077;&#1088;&#1086;&#1075;&#1083;&#1080;&#1092;&#1099; &#1076;&#1083;&#1103; &#1090;&#1099;&#1089;&#1103;&#1095; &#1080; &#1089;&#1086;&#1090;&#1077;&#1085;',
+    text: '<p>&#1042; &#1044;&#1088;&#1077;&#1074;&#1085;&#1077;&#1084; &#1045;&#1075;&#1080;&#1087;&#1090;&#1077; &#1082;&#1072;&#1078;&#1076;&#1099;&#1081; &#1088;&#1072;&#1079;&#1088;&#1103;&#1076; &#1079;&#1072;&#1087;&#1080;&#1089;&#1099;&#1074;&#1072;&#1083;&#1089;&#1103; &#1086;&#1090;&#1076;&#1077;&#1083;&#1100;&#1085;&#1099;&#1084; &#1080;&#1077;&#1088;&#1086;&#1075;&#1083;&#1080;&#1092;&#1086;&#1084;: &#1087;&#1072;&#1083;&#1086;&#1095;&#1082;&#1072; &#8212; &#1077;&#1076;&#1080;&#1085;&#1080;&#1094;&#1072;, &#1087;&#1086;&#1076;&#1082;&#1086;&#1074;&#1072; &#8212; &#1076;&#1077;&#1089;&#1103;&#1090;&#1086;&#1082;, &#1074;&#1077;&#1088;&#1105;&#1074;&#1082;&#1072; &#8212; &#1089;&#1086;&#1090;&#1085;&#1103;, &#1083;&#1086;&#1090;&#1086;&#1089; &#8212; &#1090;&#1099;&#1089;&#1103;&#1095;&#1072;. &#1063;&#1090;&#1086;&#1073;&#1099; &#1079;&#1072;&#1087;&#1080;&#1089;&#1072;&#1090;&#1100; 2&#160;043, &#1085;&#1091;&#1078;&#1085;&#1086; &#1073;&#1099;&#1083;&#1086; &#1085;&#1072;&#1088;&#1080;&#1089;&#1086;&#1074;&#1072;&#1090;&#1100; &#1076;&#1074;&#1072; &#1083;&#1086;&#1090;&#1086;&#1089;&#1072;, &#1095;&#1077;&#1090;&#1099;&#1088;&#1077; &#1087;&#1086;&#1076;&#1082;&#1086;&#1074;&#1099; &#1080; &#1090;&#1088;&#1080; &#1087;&#1072;&#1083;&#1086;&#1095;&#1082;&#1080;.</p><p>&#1057;&#1088;&#1072;&#1074;&#1085;&#1080;&#1090;&#1100; &#1076;&#1074;&#1072; &#1095;&#1080;&#1089;&#1083;&#1072; &#1073;&#1099;&#1083;&#1086; &#1087;&#1088;&#1086;&#1089;&#1090;&#1086;: &#1091; &#1082;&#1086;&#1075;&#1086; &#1073;&#1086;&#1083;&#1100;&#1096;&#1077; &#1083;&#1086;&#1090;&#1086;&#1089;&#1086;&#1074; &#8212; &#1090;&#1086;&#1090; &#1080; &#1074;&#1099;&#1080;&#1075;&#1088;&#1072;&#1083;. &#1069;&#1090;&#1086; &#1080; &#1077;&#1089;&#1090;&#1100; &#1087;&#1086;&#1088;&#1072;&#1079;&#1088;&#1103;&#1076;&#1085;&#1086;&#1077; &#1089;&#1088;&#1072;&#1074;&#1085;&#1077;&#1085;&#1080;&#1077; &#8212; &#1090;&#1086;&#1083;&#1100;&#1082;&#1086; &#1074;&#1084;&#1077;&#1089;&#1090;&#1086; &#1094;&#1080;&#1092;&#1088; &#1080;&#1089;&#1087;&#1086;&#1083;&#1100;&#1079;&#1086;&#1074;&#1072;&#1083;&#1080;&#1089;&#1100; &#1088;&#1080;&#1089;&#1091;&#1085;&#1082;&#1080;. &#1055;&#1088;&#1080;&#1085;&#1094;&#1080;&#1087; &#1085;&#1077; &#1080;&#1079;&#1084;&#1077;&#1085;&#1080;&#1083;&#1089;&#1103; &#1079;&#1072; 4&#160;000 &#1083;&#1077;&#1090;.</p>' },
+  { tag: '&#1053;&#1072;&#1091;&#1082;&#1072;',
+    title: '&#1055;&#1086;&#1095;&#1077;&#1084;&#1091; &#1085;&#1077;&#1073;&#1086;&#1089;&#1082;&#1088;&#1105;&#1073;&#1099; &#1084;&#1077;&#1088;&#1103;&#1102;&#1090; &#1087;&#1088;&#1080;&#1073;&#1083;&#1080;&#1079;&#1080;&#1090;&#1077;&#1083;&#1100;&#1085;&#1086;',
+    teaser: '&#1042;&#1099;&#1089;&#1086;&#1090;&#1072; &#1041;&#1091;&#1088;&#1076;&#1078;-&#1061;&#1072;&#1083;&#1080;&#1092;&#1072; &#1079;&#1072;&#1074;&#1080;&#1089;&#1080;&#1090; &#1086;&#1090; &#1090;&#1086;&#1075;&#1086;, &#1089;&#1095;&#1080;&#1090;&#1072;&#1090;&#1100; &#1083;&#1080; &#1072;&#1085;&#1090;&#1077;&#1085;&#1085;&#1091;',
+    imgId: 'node3_img6', hasImg: false,
+    imgDesc: '&#1040;&#1088;&#1093;&#1080;&#1090;&#1077;&#1082;&#1090;&#1086;&#1088; &#1089; &#1095;&#1077;&#1088;&#1090;&#1077;&#1078;&#1086;&#1084; &#1079;&#1076;&#1072;&#1085;&#1080;&#1103;: &#1088;&#1103;&#1076;&#1086;&#1084; &#1087;&#1086;&#1076;&#1087;&#1080;&#1089;&#1100; «&#1074;&#1099;&#1089;&#1086;&#1090;&#1072;: &#1086;&#1082;&#1086;&#1083;&#1086; 850 &#1084;&#1077;&#1090;&#1088;&#1086;&#1074;» &#1080; &#1088;&#1077;&#1072;&#1083;&#1100;&#1085;&#1099;&#1081; &#1088;&#1072;&#1079;&#1084;&#1077;&#1088; «828 &#1084;»',
+    text: '<p>&#1041;&#1091;&#1088;&#1076;&#1078;-&#1061;&#1072;&#1083;&#1080;&#1092;&#1072; &#1074; &#1044;&#1091;&#1073;&#1072;&#1077; &#8212; &#1089;&#1072;&#1084;&#1086;&#1077; &#1074;&#1099;&#1089;&#1086;&#1082;&#1086;&#1077; &#1079;&#1076;&#1072;&#1085;&#1080;&#1077; &#1074; &#1084;&#1080;&#1088;&#1077;. &#1045;&#1075;&#1086; &#1086;&#1092;&#1080;&#1094;&#1080;&#1072;&#1083;&#1100;&#1085;&#1072;&#1103; &#1074;&#1099;&#1089;&#1086;&#1090;&#1072; &#8212; 828 &#1084;&#1077;&#1090;&#1088;&#1086;&#1074;. &#1053;&#1086; &#1077;&#1089;&#1083;&#1080; &#1089;&#1095;&#1080;&#1090;&#1072;&#1090;&#1100; &#1089; &#1072;&#1085;&#1090;&#1077;&#1085;&#1085;&#1086;&#1081; &#8212; &#1094;&#1080;&#1092;&#1088;&#1099; &#1084;&#1077;&#1085;&#1103;&#1102;&#1090;&#1089;&#1103;. &#1056;&#1072;&#1079;&#1085;&#1099;&#1077; &#1080;&#1089;&#1090;&#1086;&#1095;&#1085;&#1080;&#1082;&#1080; &#1085;&#1072;&#1079;&#1099;&#1074;&#1072;&#1102;&#1090; 828, 829 &#1080;&#1083;&#1080; 830 &#1084;&#1077;&#1090;&#1088;&#1086;&#1074;.</p><p>&#1050;&#1086;&#1075;&#1076;&#1072; &#1075;&#1086;&#1074;&#1086;&#1088;&#1103;&#1090; «&#1086;&#1082;&#1086;&#1083;&#1086; 830 &#1084;&#1077;&#1090;&#1088;&#1086;&#1074;» &#8212; &#1101;&#1090;&#1086; &#1085;&#1077; &#1083;&#1077;&#1085;&#1100;, &#1072; &#1095;&#1077;&#1089;&#1090;&#1085;&#1086;&#1089;&#1090;&#1100;: &#1090;&#1086;&#1095;&#1085;&#1086;&#1089;&#1090;&#1100; &#1080;&#1079;&#1084;&#1077;&#1088;&#1077;&#1085;&#1080;&#1103; &#1086;&#1075;&#1088;&#1072;&#1085;&#1080;&#1095;&#1077;&#1085;&#1072; &#1084;&#1077;&#1090;&#1086;&#1076;&#1086;&#1084;. &#1040;&#1088;&#1093;&#1080;&#1090;&#1077;&#1082;&#1090;&#1086;&#1088;&#1091; &#1085;&#1091;&#1078;&#1085;&#1072; &#1090;&#1086;&#1095;&#1085;&#1086;&#1089;&#1090;&#1100; &#1076;&#1086; &#1089;&#1072;&#1085;&#1090;&#1080;&#1084;&#1077;&#1090;&#1088;&#1072;. &#1058;&#1091;&#1088;&#1080;&#1089;&#1090;&#1091; &#1076;&#1086;&#1089;&#1090;&#1072;&#1090;&#1086;&#1095;&#1085;&#1086; «&#1087;&#1086;&#1095;&#1090;&#1080; &#1082;&#1080;&#1083;&#1086;&#1084;&#1077;&#1090;&#1088;». &#1054;&#1082;&#1088;&#1091;&#1075;&#1083;&#1077;&#1085;&#1080;&#1077; &#8212; &#1101;&#1090;&#1086; &#1074;&#1099;&#1073;&#1086;&#1088; &#1087;&#1086;&#1076;&#1093;&#1086;&#1076;&#1103;&#1097;&#1077;&#1081; &#1090;&#1086;&#1095;&#1085;&#1086;&#1089;&#1090;&#1080; &#1076;&#1083;&#1103; &#1082;&#1086;&#1085;&#1082;&#1088;&#1077;&#1090;&#1085;&#1086;&#1075;&#1086; &#1088;&#1072;&#1079;&#1075;&#1086;&#1074;&#1086;&#1088;&#1072;.</p>' }
+];
+
+/* ── Прогресс узла ── */
+
+var preCheckAnswered = false;
+var checkAnswered    = false;
+var sortAttempted    = false;
+var roundAttempted   = false;
+var readAttempted    = false;
+var quizAttempted    = false;
+var readAnswered     = {};
+var readCount        = 0;
+
+function tryMarkDone() {
+  if (preCheckAnswered && checkAnswered && sortAttempted && roundAttempted && readAttempted && quizAttempted) {
+    Progress.markDone('node3');
+  }
+}
+
+function checkAllDone() {
+  quizAttempted = true;
+  tryMarkDone();
+}
+
+/* ── Инициализация ── */
+
+initPreCheck();
+initCheck();
+initSort();
+initRound();
+initRead();
+initGlossary();
+initMisc();
+initRemember();
+initSelfcheck();
+initQuiz();
+initDYK();
+
+</script>
+</body>
+</html>

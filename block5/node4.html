@@ -503,6 +503,8 @@ function initPreCheck() {
       btn.innerHTML = opt.text;
       btn.setAttribute('data-correct', opt.correct ? 'true' : 'false');
       btn.onclick = function() {
+        preCheckAttempted = true;
+        tryMarkDone();
         if (opt.correct) {
           btn.className = 'check-opt correct';
           fb.className = 'check-fb ok';
@@ -546,6 +548,8 @@ function initCheck() {
       btn.innerHTML = opt.text;
       btn.setAttribute('data-correct', opt.correct ? 'true' : 'false');
       btn.onclick = function() {
+        checkAttempted = true;
+        tryMarkDone();
         if (opt.correct) {
           btn.className = 'check-opt correct';
           fb.className = 'check-fb ok';
@@ -688,6 +692,8 @@ function renderMatch2() {
 
 function match2Pick(btn, idx) {
   if (match2Done) return;
+  matchAttempted = true;
+  tryMarkDone();
   var row = document.getElementById('sortContainer').querySelectorAll('.match2-row')[idx];
   var btns = row.querySelectorAll('.match2-btn');
   var i;
@@ -751,6 +757,8 @@ function sortChipTap(btn) {
 }
 
 function sortSlotTap(slot) {
+  sortAttempted = true;
+  tryMarkDone();
   var idx = parseInt(slot.getAttribute('data-idx'), 10);
 
   /* Если в слоте уже стоит чип и ничего не выбрано — забрать его обратно в банк */
@@ -896,6 +904,7 @@ function initReadQuiz() {
           btn.innerHTML = opt.text;
           btn.setAttribute('data-correct', opt.correct ? 'true' : 'false');
           btn.onclick = function() {
+            if (!readAnswered[READ_QS.indexOf(q)]) { readAnswered[READ_QS.indexOf(q)] = true; readCount++; if (readCount >= READ_QS.length) { readAttempted = true; tryMarkDone(); } }
             var btns = optsDiv.querySelectorAll('.read-opt');
             var m;
             for (m = 0; m < btns.length; m++) { btns[m].style.pointerEvents = 'none'; }
@@ -1014,7 +1023,28 @@ var DYK = [
   }
 ];
 
-var checkAnswered = false;
+var checkAnswered     = false;
+
+/* ── Прогресс узла ── */
+var preCheckAttempted = false;
+var checkAttempted    = false;
+var matchAttempted    = false;
+var sortAttempted     = false;
+var readAttempted     = false;
+var quizAttempted     = false;
+var readAnswered      = {};
+var readCount         = 0;
+
+function tryMarkDone() {
+  if (preCheckAttempted && checkAttempted && matchAttempted && sortAttempted && readAttempted && quizAttempted) {
+    Progress.markDone('node4');
+  }
+}
+
+function checkAllDone() {
+  quizAttempted = true;
+  tryMarkDone();
+}
 
 /* ── Инициализация ── */
 updateSim();

@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Узел 2 · Координатная прямая и шкалы</title>
+  <link rel="stylesheet" href="../shared.css">
+  <style>
+    /* Симуляция — шкала градусника */
+    .thermo-wrap {
+      padding: 8px 0 4px;
+      overflow-x: auto;
+    }
+    .thermo-scale {
+      position: relative;
+      height: 80px;
+      min-width: 280px;
+      margin: 0 auto;
+      max-width: 560px;
+    }
+    .thermo-line {
+      position: absolute;
+      left: 20px; right: 20px;
+      top: 36px;
+      height: 3px;
+      background: #E0D8CC;
+      border-radius: 2px;
+    }
+    .thermo-arrow {
+      position: absolute;
+      right: 12px;
+      top: 28px;
+      width: 0; height: 0;
+      border-top: 9px solid transparent;
+      border-bottom: 9px solid transparent;
+      border-left: 12px solid #E0D8CC;
+    }
+    .thermo-ticks { position: absolute; left: 20px; right: 20px; top: 0; bottom: 0; }
+    .thermo-tick {
+      position: absolute;
+      top: 28px;
+      width: 1.5px;
+      background: #C4B89A;
+      transform: translateX(-50%);
+    }
+    .thermo-tick.major { background: #888; width: 2px; }
+    .thermo-tick-label {
+      position: absolute;
+      top: 48px;
+      font-family: var(--font-main);
+      font-size: 11px;
+      font-weight: 700;
+      color: #666;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+    .thermo-point {
+      position: absolute;
+      top: 20px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      transform: translateX(-50%);
+      border: 2.5px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    .thermo-point-label {
+      position: absolute;
+      top: 2px;
+      font-family: var(--font-main);
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+      transform: translateX(-50%);
+    }
+    .thermo-status {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #666;
+      min-height: 20px;
+      margin-top: 4px;
+      padding: 0 16px;
+    }
+    .thermo-status.warn { color: #C47C1A; }
+
+    /* Sort */
+    .sort-wrap { padding: 16px; }
+    .sort-header { font-size: 15px; font-weight: 700; color: #555; margin-bottom: 10px; text-align: center; }
+    .sort-number-line {
+      position: relative;
+      height: 48px;
+      margin-bottom: 14px;
+    }
+    .sort-nl-line {
+      position: absolute;
+      left: 12px; right: 12px;
+      top: 20px; height: 3px;
+      background: #E0D8CC; border-radius: 2px;
+    }
+    .sort-nl-arrow {
+      position: absolute; right: 4px; top: 12px;
+      width: 0; height: 0;
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+      border-left: 10px solid #E0D8CC;
+    }
+    .sort-nl-ticks { position: absolute; left: 12px; right: 12px; top: 0; bottom: 0; }
+    .sort-nl-tick {
+      position: absolute; top: 14px;
+      width: 1.5px; height: 12px;
+      background: #C4B89A;
+      transform: translateX(-50%);
+    }
+    .sort-nl-tick.major { background: #888; height: 14px; top: 13px; }
+    .sort-nl-label {
+      position: absolute; top: 30px;
+      font-family: var(--font-main); font-size: 11px; font-weight: 700;
+      color: #999; transform: translateX(-50%);
+    }
+    .sort-bank {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      justify-content: center; margin-bottom: 10px;
+    }
+    .sort-chip {
+      background: #fff; border: 1.5px solid #E0D8CC;
+      border-radius: 8px; padding: 6px 12px;
+      font-family: var(--font-main); font-size: 16px; font-weight: 800;
+      color: #333; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .sort-chip:active { transform: scale(0.95); }
+    .sort-chip.sel { border-color: #C47C1A; background: #FFF8ED; color: #C47C1A; }
+    .sort-chip.placed { opacity: 0.3; pointer-events: none; }
+    .sort-result {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      justify-content: center; margin-bottom: 10px; min-height: 40px;
+      align-items: center;
+    }
+    .sort-slot {
+      width: 42px; height: 36px;
+      border: 1.5px dashed #C4B89A;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-main); font-size: 15px; font-weight: 800;
+      color: #C47C1A; background: #FFF8ED;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .sort-slot.empty { color: #C4B89A; background: transparent; }
+    .sort-slot.correct { border-color: #22C55E; background: #ECFDF5; color: #166534; }
+    .sort-slot.wrong   { border-color: #F87171; background: #FEF2F2; color: #991B1B; }
+    .sort-fb { text-align: center; font-size: 14px; font-weight: 700; color: #AAA098; min-height: 20px; }
+    .sort-check-btn {
+      display: block; margin: 10px auto 0;
+      background: #C47C1A; color: #fff;
+      border: none; border-radius: 10px;
+      padding: 10px 24px;
+      font-family: var(--font-main); font-size: 14px; font-weight: 800;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+    .sort-reset-btn {
+      display: none; margin: 8px auto 0;
+      background: #fff; color: #666;
+      border: 1.5px solid #E0D8CC; border-radius: 10px;
+      padding: 8px 20px;
+      font-family: var(--font-main); font-size: 13px; font-weight: 700;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (min-width: 600px) {
+      .thermo-tick-label { font-size: clamp(11px,1.7vw,14px); }
+      .sort-chip { font-size: clamp(16px,2.5vw,22px); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-badge">2</div>
+    <div class="topbar-title">Координатная прямая и шкалы</div>
+    <a href="index.html" class="topbar-back">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      На плакат
+    </a>
+  </div>
+</div>
+
+<div class="page">
+<div class="col">
+
+  <!-- 1. HOOK -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="#0D0C59"><path d="M11.95 18q.525 0 .888-.363t.362-.887t-.362-.888t-.888-.362t-.887.363t-.363.887t.363.888t.887.362m.05 4q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m.1-12.3q.625 0 1.088.4t.462 1q0 .55-.337.975t-.763.8q-.575.5-1.012 1.1t-.438 1.35q0 .35.263.588t.612.237q.375 0 .638-.25t.337-.625q.1-.525.45-.937t.75-.788q.575-.55.988-1.2t.412-1.45q0-1.275-1.037-2.087T12.1 6q-.95 0-1.812.4T8.975 7.625q-.175.3-.112.638t.337.512q.35.2.725.125t.625-.425q.275-.375.688-.575t.862-.2"/></svg></div><span class="sec-pill-text">Подумай перед началом</span></div></div>
+    <div class="hook-card">
+      <div class="img-placeholder img-ph-16-7">
+        <div class="img-placeholder-icon">🌡</div>
+        <div class="img-placeholder-id">node2_img1</div>
+        <div class="img-placeholder-desc">Крупный план градусника: шкала от 35 до 42, отметка 36,6 выделена</div>
+      </div>
+      <div class="hook-text-wrap">
+        <div class="hook-label">Вопрос</div>
+        <div class="hook-text">Ты наверняка слышал: нормальная температура тела — 36,6. Но почему именно эта точка считается нормой? Откуда взялась эта цифра и как врач видит её на градуснике среди других делений?<br><br>Градусник — это шкала. Каждая отметка на нём — это число, привязанное к точному месту. Без такой шкалы нельзя было бы сказать «у тебя 37,2 — чуть выше нормы».<br><br><strong>Как устроен этот инструмент и почему без нуля он не работает?</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. ЧЕК-ВОПРОС ДО СИМУЛЯЦИИ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="#0D0C59"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m1 17h-2v-2h2zm2.07-7.75-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25"/></svg></div><span class="sec-pill-text">Подумай перед началом</span></div></div>
+    <div class="card">
+      <div class="check-wrap">
+        <div class="check-q">На градуснике отметки 36 и 38 стоят на одинаковом расстоянии от отметки 37. Верно ли это?</div>
+        <div class="check-opts" id="preCheckOpts"></div>
+        <div class="check-fb" id="preCheckFb"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. СИМУЛЯЦИЯ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 512 512" fill="#0D0C59"><path fill-rule="evenodd" d="M421.935 90.066c2.286 2.287 5.356 7.973 4.013 21.398c-1.323 13.221-6.731 30.687-16.845 51.505a306 306 0 0 1-3.77 7.492v42.31c39.823-61.993 54.037-115.44 31.687-137.79c-22.529-22.528-76.652-7.907-139.277 32.646l20.879 12.054c10.535-6.46 20.717-12.073 30.411-16.783c20.817-10.114 38.283-15.522 51.504-16.845c13.425-1.343 19.112 1.727 21.398 4.013M405.333 341.54v-42.31c39.823 61.993 54.037 115.44 31.687 137.79c-22.536 22.536-76.689 7.897-139.341-32.687l20.877-12.053c10.559 6.477 20.763 12.104 30.477 16.823c20.817 10.114 38.283 15.522 51.505 16.845c13.424 1.343 19.111-1.727 21.397-4.013c2.287-2.287 5.357-7.973 4.013-21.398c-1.322-13.221-6.73-30.687-16.845-51.505a306 306 0 0 0-3.77-7.492m-211.888 50.74l20.876 12.053c-62.651 40.584-116.804 55.223-139.34 32.687c-22.35-22.35-8.136-75.795 31.686-137.788v42.31a309 309 0 0 0-3.769 7.49c-10.114 20.818-15.522 38.284-16.845 51.505c-1.343 13.425 1.727 19.111 4.013 21.398c2.287 2.286 7.973 5.356 21.398 4.013c13.221-1.323 30.687-6.731 51.505-16.845c9.713-4.719 19.917-10.346 30.476-16.823M74.981 74.981c-22.35 22.35-8.136 75.795 31.686 137.788v-42.311a308 308 0 0 1-3.769-7.489c-10.114-20.818-15.522-38.284-16.845-51.505c-1.343-13.425 1.727-19.111 4.013-21.398c2.287-2.286 7.973-5.356 21.398-4.013c13.221 1.323 30.687 6.73 51.505 16.845c9.693 4.709 19.874 10.322 30.41 16.782l20.878-12.054C151.633 67.074 97.51 52.453 74.981 74.981M256 108.16l128 73.901v147.801l-128 73.901l-128-73.901V182.06zm85.333 123.132v73.937l-64 36.95v-73.937zm-106.666 36.95v73.937l-64-36.95v-73.937zM256 231.291l-63.969-36.933L256 157.426l63.969 36.932z" clip-rule="evenodd"/></svg></div><span class="sec-pill-text">Симуляция — подвигай ползунок</span></div></div>
+    <div class="card">
+      <div class="sim-top">
+        <div class="thermo-wrap">
+          <div class="thermo-scale" id="thermoScale">
+            <div class="thermo-line"></div>
+            <div class="thermo-arrow"></div>
+            <div class="thermo-ticks" id="thermoTicks"></div>
+          </div>
+        </div>
+        <div class="thermo-status" id="thermoStatus"></div>
+      </div>
+      <div class="sliders">
+        <div class="slider-row">
+          <div class="slider-lbl">
+            <span class="slider-lbl-t">Шаг деления</span>
+            <span class="slider-val" id="stepVal">0.5</span>
+          </div>
+          <input type="range" id="stepSlider" min="0" max="4" value="2" step="1" oninput="updateSim(this.value)">
+        </div>
+      </div>
+      <div class="presets">
+        <button class="preset-btn" onclick="setStep(0)">0,1</button>
+        <button class="preset-btn" onclick="setStep(1)">0,2</button>
+        <button class="preset-btn" onclick="setStep(2)">0,5</button>
+        <button class="preset-btn" onclick="setStep(3)">1</button>
+        <button class="preset-btn" onclick="setStep(4)">2</button>
+      </div>
+      <div class="check-wrap">
+        <div class="check-q">Врач хочет видеть разницу между 36,6 и 37,0 на шкале. Какой шаг деления подходит?</div>
+        <div class="check-opts" id="checkOpts"></div>
+        <div class="check-fb" id="checkFb"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ОБЪЯСНЕНИЕ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="#0D0C59"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74c0-3.86-3.14-7-7-7m2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A5 5 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1"/></svg></div><span class="sec-pill-text">Главная идея</span></div></div>
+    <div class="card">
+      <div class="expl-block">
+        <div class="expl-lbl">Как это работает</div>
+        <div class="expl-t">Координатная прямая — это прямая линия с выбранной точкой отсчёта (нулём) и одинаковыми делениями. Каждой точке на ней соответствует ровно одно число — её <strong>координата</strong>. Это универсальный инструмент: термометр, линейка, ось графика — всё это координатные прямые.</div>
+      </div>
+      <div class="img-placeholder img-ph-16-7" style="margin:0 16px 0;border-radius:8px;">
+        <div class="img-placeholder-icon">📏</div>
+        <div class="img-placeholder-id">node2_img2</div>
+        <div class="img-placeholder-desc">Горизонтальная координатная прямая: стрелка вправо, нуль, деления 1–10, точка A на отметке 7</div>
+      </div>
+      <div class="expl-block">
+        <div class="expl-lbl">Нуль как точка отсчёта</div>
+        <div class="expl-t">Без нуля шкала теряет смысл. Нуль — это договорённость: отсюда считаем. На линейке нуль — левый край. На градуснике нуль — это ноль градусов, конкретная физическая точка. Сдвинь нуль — все остальные числа сдвинутся вместе с ним.</div>
+      </div>
+      <div class="expl-block">
+        <div class="expl-lbl">Шаг деления — под задачу</div>
+        <div class="expl-t">Для измерения температуры тела нужен шаг 0,1 или 0,2 градуса — важна точность. Для расстояния между городами подойдёт шаг 50 или 100 км. Один и тот же диапазон можно показать с разной точностью — это выбор того, кто строит шкалу.</div>
+      </div>
+      <div class="expl-block">
+        <div class="expl-lbl">Не путай</div>
+        <div class="expl-alert">Координата точки — это <strong>расстояние от нуля</strong>, а не от соседней точки. Точка с координатой 7 находится на расстоянии 7 единиц от нуля, а не от точки 6.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ОПОРНЫЙ КОНСПЕКТ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="#0D0C59"><path d="M5 3c-1.11 0-2 .89-2 2v14c0 1.11.89 2 2 2h14c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 2h14v14H5zm2 2v2h10V7zm0 4v2h10v-2zm0 4v2h7v-2z"/></svg></div><span class="sec-pill-text">Опорный конспект</span></div></div>
+    <button class="cs-toggle" id="csToggle" onclick="toggleCS()">
+      <span>Открыть — читай перед контрольной</span>
+      <span class="cs-toggle-icon">&#9662;</span>
+    </button>
+    <div class="cs-body card" id="csBody">
+      <div class="cs-block">
+        <div class="cs-lbl">Что это</div>
+        <div class="cs-text">Координатная прямая — прямая линия с точкой отсчёта (нулём) и равными делениями. Каждой точке соответствует одно число — её координата.</div>
+      </div>
+      <div class="cs-block">
+        <div class="cs-lbl">Главные факты</div>
+        <div class="cs-list">
+          <div class="cs-item">Нуль — точка отсчёта, обязательный элемент координатной прямой</div>
+          <div class="cs-item">Деления всегда равные — иначе шкала даёт неверные результаты</div>
+          <div class="cs-item">Координата точки — её расстояние от нуля, не от соседней точки</div>
+          <div class="cs-item">Расстояние между двумя точками: большая координата минус меньшая</div>
+          <div class="cs-item">Шаг деления выбирают под задачу: точнее — меньше шаг</div>
+          <div class="cs-item">Координатную прямую придумал Рене Декарт в XVII веке</div>
+        </div>
+      </div>
+      <div class="cs-block">
+        <div class="cs-lbl">Не путать</div>
+        <div class="cs-confusion">
+          <div class="cs-conf-row">
+            <div class="cs-conf-wrong">«Координатная прямая может начинаться с любого числа» — неверно</div>
+            <div class="cs-conf-right">Всегда начинается с нуля. Шкала на графике может начинаться с другого числа, но это сокращённая ось, не координатная прямая.</div>
+          </div>
+          <div class="cs-conf-row">
+            <div class="cs-conf-wrong">«Координата — расстояние до соседней точки» — неверно</div>
+            <div class="cs-conf-right">Координата — расстояние от нуля. Точка 7 стоит на расстоянии 7 единиц от нуля.</div>
+          </div>
+        </div>
+      </div>
+      <div class="cs-block">
+        <div class="cs-lbl">Приём для запоминания</div>
+        <div class="cs-hint">Расстояние между точками 3 и 8: вычти меньшую из большей — 8 − 3 = 5.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ГЛОССАРИЙ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 256 256" fill="#0D0C59"><path d="M85.43 53.45a6 6 0 0 0-10.86 0l-64 136a6 6 0 1 0 10.86 5.11L38.63 158h82.74l17.2 36.55a6 6 0 1 0 10.86-5.11ZM44.28 146L80 70.09L115.72 146ZM200 98c-12.21 0-21.71 3.28-28.23 9.74a6 6 0 0 0 8.46 8.52c4.18-4.15 10.84-6.26 19.77-6.26c14.34 0 26 9.87 26 22v7.24a40.36 40.36 0 0 0-26-9.24c-20.95 0-38 15.25-38 34s17.05 34 38 34a40.36 40.36 0 0 0 26-9.24V192a6 6 0 0 0 12 0v-60c0-18.75-17-34-38-34m0 88c-14.34 0-26-9.87-26-22s11.66-22 26-22s26 9.87 26 22s-11.66 22-26 22"/></svg></div><span class="sec-pill-text">Глоссарий — тапни чтобы открыть</span></div></div>
+    <div class="gloss-list" id="glossList"></div>
+  </div>
+
+  <!-- 7. ТРЕНАЖЁР — MATCH -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-train"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#854D0E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="15" width="7" height="7" rx="1"/><rect x="14" y="15" width="7" height="7" rx="1"/><path d="M10 7.5h4M10 18.5h4"/></svg></div><span class="sec-pill-text">Тренажёр — установи соответствие</span></div></div>
+    <div class="card">
+      <div class="match-wrap">
+        <div class="match-header">Выбери подходящий шаг деления для каждой задачи</div>
+        <div class="match-cols" id="matchCols">
+          <div class="match-col" id="matchLeft"></div>
+          <div class="match-col" id="matchRight"></div>
+        </div>
+        <div class="match-score" id="matchScore"></div>
+        <button class="match-reset" id="matchReset" onclick="initMatch()">Ещё раз</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. ТРЕНАЖЁР — SORT -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-train"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#854D0E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M7 12h10M11 18h2"/></svg></div><span class="sec-pill-text">Тренажёр — расставь по порядку</span></div></div>
+    <div class="card">
+      <div class="sort-wrap">
+        <div class="sort-header">Расставь числа на координатной прямой от наименьшего к наибольшему</div>
+        <div class="sort-number-line">
+          <div class="sort-nl-line"></div>
+          <div class="sort-nl-arrow"></div>
+          <div class="sort-nl-ticks" id="sortNlTicks"></div>
+        </div>
+        <div class="sort-bank" id="sortBank"></div>
+        <div class="sort-result" id="sortResult"></div>
+        <div class="sort-fb" id="sortFb"></div>
+        <button class="sort-check-btn" id="sortCheckBtn" onclick="sortCheck()">Проверить</button>
+        <button class="sort-reset-btn" id="sortResetBtn" onclick="initSort()">Ещё раз</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. ЧТЕНИЕ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0D0C59" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="M11 16.5s1.5.5 2.25 2.5c0 0 3.573-5.833 6.75-7"/><path d="M4 5h14M4 10h11M4 15h4"/></svg></div><span class="sec-pill-text">Читай и отвечай</span></div></div>
+    <div class="card">
+      <div class="read-tag">Шкалы везде</div>
+      <div class="img-placeholder img-ph-16-7" style="border-radius:8px;margin-bottom:4px;">
+        <div class="img-placeholder-icon">✈️</div>
+        <div class="img-placeholder-id">node2_img5</div>
+        <div class="img-placeholder-desc">Панель приборов самолёта: высотомер, спидометр, компас — все со шкалами</div>
+      </div>
+      <div class="read-text">
+        <p>Координатная прямая — не только математический инструмент. Каждый раз, когда ты смотришь на шкалу прибора, ты читаешь координаты.</p>
+        <p>Пилот самолёта следит за высотомером — шкала от 0 до 12 000 с шагом 500. Врач измеряет давление — шкала от 0 до 300 с шагом 10. Повар проверяет температуру духовки — шкала от 50 до 300 с шагом 25.</p>
+        <p>Везде одно и то же устройство: нуль, равные деления, число на каждой отметке. Только диапазон и шаг выбирают под задачу.</p>
+      </div>
+      <div class="read-qs" id="readQs"></div>
+    </div>
+  </div>
+
+  <!-- 10. MISCONCEPTIONS -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-err"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L2 21h20L12 3z"/><path d="M12 10v4M12 17v.5"/></svg></div><span class="sec-pill-text">Так часто думают — но это неверно</span></div></div>
+    <div class="misc-grid" id="miscGrid"></div>
+    <div class="misc-panel" id="miscPanel"></div>
+  </div>
+
+  <!-- 11. ЗАПОМНИ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-train"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#854D0E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18l7-4 7 4V3H5z"/></svg></div><span class="sec-pill-text">Запомни</span></div></div>
+    <div class="remember-list" id="rememberList"></div>
+  </div>
+
+  <!-- 12. ПРОВЕРЬ СЕБЯ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-train"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#854D0E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg></div><span class="sec-pill-text">Проверь себя</span></div></div>
+    <div class="selfcheck-list" id="selfcheckList"></div>
+  </div>
+
+  <!-- 13. ФИНАЛЬНЫЙ КВИЗ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-train"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#854D0E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L4 14h7l-1 7 9-11h-7l1-7z"/></svg></div><span class="sec-pill-text">Финальный квиз</span></div></div>
+    <div class="card">
+      <div class="quiz-prog" id="qProg"></div>
+      <div class="quiz-qw" id="qCard"></div>
+    </div>
+  </div>
+
+  <!-- 14. DYK -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 56 56" fill="#0D0C59"><path d="M28 51.906c13.055 0 23.906-10.828 23.906-23.906c0-13.055-10.875-23.906-23.93-23.906C14.899 4.094 4.095 14.945 4.095 28c0 13.078 10.828 23.906 23.906 23.906m0-3.984C16.937 47.922 8.1 39.062 8.1 28c0-11.04 8.813-19.922 19.876-19.922c11.039 0 19.921 8.883 19.945 19.922c.023 11.063-8.883 19.922-19.922 19.922m-.023-15.68c1.124 0 1.757-.633 1.78-1.851l.352-12.375c.024-1.196-.914-2.086-2.156-2.086c-1.266 0-2.156.867-2.133 2.062l.305 12.399c.023 1.195.68 1.851 1.852 1.851m0 7.617c1.335 0 2.53-1.078 2.53-2.437c0-1.383-1.171-2.438-2.53-2.438c-1.383 0-2.532 1.078-2.532 2.438c0 1.336 1.172 2.437 2.532 2.437"/></svg></div><span class="sec-pill-text">Знаешь ли ты что...</span></div></div>
+    <div class="dyk-grid" id="dykGrid"></div>
+    <div class="dyk-panel" id="dykPanel"></div>
+  </div>
+
+</div>
+</div>
+
+<div class="col bottom-back">
+  <a href="index.html" class="back-to-poster">← На плакат</a>
+</div>
+
+<div class="finish-ov" id="finOv">
+  <div class="finish-card">
+    <div class="finish-score" id="finScore"></div>
+    <div class="finish-btns">
+      <a href="index.html" class="finish-btn finish-btn-pri">На плакат</a>
+      <button class="finish-btn finish-btn-sec" onclick="finStay()">Остаться в теме</button>
+    </div>
+  </div>
+</div>
+
+<script src="../shared.js"></script>
+<script>
+  BLOCK_ID = 'math5_block1';
+
+  /* ── Симуляция — шкала градусника ── */
+  var STEPS = [0.1, 0.2, 0.5, 1, 2];
+  var STEP_LABELS = ['0,1', '0,2', '0,5', '1', '2'];
+  var STATUS_MSGS = [
+    'Слишком много делений — шкала перегружена, трудно читать',
+    'Много делений, все три точки различимы',
+    'Удобно — все три точки хорошо видны',
+    'Удобно, но 36,6 и 37,5 попадают между делениями',
+    'Слишком крупно — 36,6 и 37,5 неразличимы'
+  ];
+  var POINTS = [
+    { val: 36.6, color: '#22C55E', label: '36,6 норма' },
+    { val: 37.5, color: '#F59E0B', label: '37,5' },
+    { val: 39.0, color: '#EF4444', label: '39,0' }
+  ];
+  var MIN_T = 35, MAX_T = 42;
+
+  function updateSim(idx) {
+    idx = parseInt(idx, 10);
+    document.getElementById('stepSlider').value = idx;
+    var step = STEPS[idx];
+    document.getElementById('stepVal').textContent = STEP_LABELS[idx];
+    var statusEl = document.getElementById('thermoStatus');
+    statusEl.textContent = STATUS_MSGS[idx];
+    statusEl.className = 'thermo-status' + (idx === 0 || idx === 4 ? ' warn' : '');
+    drawScale(step);
+  }
+
+  function setStep(idx) { updateSim(idx); }
+
+  function drawScale(step) {
+    var container = document.getElementById('thermoTicks');
+    container.innerHTML = '';
+    var scaleEl = document.getElementById('thermoScale');
+    var W = scaleEl.offsetWidth - 40;
+    if (W <= 0) { return; }
+    var range = MAX_T - MIN_T;
+
+    /* Тики */
+    var t = MIN_T;
+    while (t <= MAX_T + 0.001) {
+      var pct = (t - MIN_T) / range;
+      var x = Math.round(pct * W);
+      var isMajor = Math.abs(Math.round(t) - t) < 0.001;
+      var tick = document.createElement('div');
+      tick.className = 'thermo-tick' + (isMajor ? ' major' : '');
+      tick.style.left = x + 'px';
+      tick.style.height = isMajor ? '16px' : '10px';
+      container.appendChild(tick);
+      if (isMajor) {
+        var lbl = document.createElement('div');
+        lbl.className = 'thermo-tick-label';
+        lbl.style.left = x + 'px';
+        lbl.textContent = Math.round(t);
+        container.appendChild(lbl);
+      }
+      t = Math.round((t + step) * 100) / 100;
+    }
+
+    /* Точки */
+    var i;
+    for (i = 0; i < POINTS.length; i++) {
+      var pt = POINTS[i];
+      var px = Math.round((pt.val - MIN_T) / range * W);
+      var dot = document.createElement('div');
+      dot.className = 'thermo-point';
+      dot.style.left = px + 'px';
+      dot.style.background = pt.color;
+      container.appendChild(dot);
+      var ptLbl = document.createElement('div');
+      ptLbl.className = 'thermo-point-label';
+      ptLbl.style.left = px + 'px';
+      ptLbl.style.top = '-16px';
+      ptLbl.style.color = pt.color;
+      ptLbl.style.fontSize = '9px';
+      ptLbl.style.fontWeight = '800';
+      ptLbl.style.fontFamily = 'var(--font-main)';
+      ptLbl.textContent = pt.label;
+      container.appendChild(ptLbl);
+    }
+  }
+
+  /* ── Чек-вопрос до симуляции ── */
+  var PRE_CHECK_OPTS = [
+    { text: 'Да — деления на шкале равные, расстояние одинаковое', correct: true },
+    { text: 'Нет — 38 дальше от нормы, поэтому и на шкале дальше', correct: false },
+    { text: 'Нет — шкала градусника не обязана быть равномерной', correct: false },
+    { text: 'Зависит от производителя градусника', correct: false }
+  ];
+
+  function initPreCheck() {
+    var wrap = document.getElementById('preCheckOpts');
+    var items = shuffleArr(PRE_CHECK_OPTS);
+    var html = '';
+    var i;
+    for (i = 0; i < items.length; i++) {
+      html += '<button class="check-opt" data-correct="' + items[i].correct + '" onclick="preChk(this)">' + items[i].text + '</button>';
+    }
+    wrap.innerHTML = html;
+  }
+
+  function preChk(btn) {
+    var correct = btn.getAttribute('data-correct') === 'true';
+    var fb   = document.getElementById('preCheckFb');
+    var opts = document.getElementById('preCheckOpts').querySelectorAll('.check-opt');
+    var i;
+    if (correct) {
+      preCheckAttempted = true;
+      tryMarkDone();
+      for (i = 0; i < opts.length; i++) { opts[i].style.pointerEvents = 'none'; }
+      btn.classList.add('correct');
+      fb.className = 'check-fb ok';
+      fb.textContent = 'Верно. Деления на любой правильной шкале равные — иначе прибор врёт. Именно это мы сейчас и разберём.';
+    } else {
+      btn.classList.add('wrong');
+      fb.className = 'check-fb err';
+      fb.textContent = 'Шкала — не карта «опасности». Она показывает расстояние от нуля, а не от нормы. Деления всегда равные.';
+      setTimeout(function() {
+        btn.classList.remove('wrong');
+        fb.className = 'check-fb';
+        fb.textContent = '';
+      }, TIMING.wrongHint);
+    }
+  }
+
+  /* ── Чек-вопрос после симуляции ── */
+  var CHECK_OPTS = [
+    { text: 'Шаг 2 — крупные деления проще читать', correct: false },
+    { text: 'Шаг 1 — одно деление на каждый градус', correct: false },
+    { text: 'Шаг 0,2 или 0,5 — тогда 36,6 и 37,0 на разных отметках', correct: true },
+    { text: 'Шаг не важен — достаточно написать число рядом с точкой', correct: false }
+  ];
+
+  function initCheck() {
+    var wrap = document.getElementById('checkOpts');
+    var items = shuffleArr(CHECK_OPTS);
+    var html = '';
+    var i;
+    for (i = 0; i < items.length; i++) {
+      html += '<button class="check-opt" data-correct="' + items[i].correct + '" onclick="chk(this)">' + items[i].text + '</button>';
+    }
+    wrap.innerHTML = html;
+  }
+
+  function chk(btn) {
+    var correct = btn.getAttribute('data-correct') === 'true';
+    var fb   = document.getElementById('checkFb');
+    var opts = document.getElementById('checkOpts').querySelectorAll('.check-opt');
+    var i;
+    if (correct) {
+      checkAnswered = true;
+      tryMarkDone();
+      for (i = 0; i < opts.length; i++) { opts[i].style.pointerEvents = 'none'; }
+      btn.classList.add('correct');
+      fb.className = 'check-fb ok';
+      fb.textContent = 'Именно так. Разница между 36,6 и 37,0 — это 0,4 градуса. Чтобы её видеть, шаг должен быть меньше 0,4 — например, 0,2 или 0,5.';
+    } else {
+      btn.classList.add('wrong');
+      fb.className = 'check-fb err';
+      fb.textContent = 'Посчитай: разница между 36,6 и 37,0 — это 0,4 градуса. При шаге 1 обе точки попадут между делениями и их не различить.';
+      setTimeout(function() {
+        btn.classList.remove('wrong');
+        fb.className = 'check-fb';
+        fb.textContent = '';
+      }, TIMING.wrongHint);
+    }
+  }
+
+  /* ── Глоссарий ── */
+  var GLOSSARY = [
+    { term: 'Координатная прямая', def: 'Прямая линия с точкой отсчёта и равными делениями, каждой точке соответствует одно число.', example: 'Линейка, градусник, ось графика — всё это координатные прямые.' },
+    { term: 'Координата точки', def: 'Число, показывающее расстояние точки от нуля.', example: 'Точка A стоит на отметке 7 — её координата равна 7.' },
+    { term: 'Точка отсчёта', def: 'Нуль на шкале — точка, от которой считают все остальные координаты.', example: 'На линейке нуль — левый край. На градуснике нуль — ноль градусов.' },
+    { term: 'Шаг деления', def: 'Расстояние между соседними отметками на шкале.', example: 'На градуснике шаг 0,1 или 0,2 градуса.' },
+    { term: 'Единичный отрезок', def: 'Расстояние между соседними целыми числами на координатной прямой.', example: 'От 0 до 1, от 3 до 4 — каждый такой отрезок одинаковый.' },
+    { term: 'Шкала', def: 'Система равных делений на координатной прямой.', example: 'Шкала градусника, шкала весов, шкала на карте.' }
+  ];
+
+  /* ── Match ── */
+  var MATCH_PAIRS = [
+    { l: 'Температура тела больного', r: 'Шаг 0,1 — важна точность до десятых', key: 0 },
+    { l: 'Расстояние от Земли до Луны', r: 'Шаг 1\u202f000 — значения огромные', key: 1 },
+    { l: 'Рост взрослого человека', r: 'Шаг 5 — диапазон небольшой, точность умеренная', key: 2 },
+    { l: 'Время варки яйца', r: 'Шаг 1 — важна каждая единица', key: 3 },
+    { l: 'Диаметр бактерии', r: 'Шаг 0,001 — объект микроскопический', key: 4 }
+  ];
+
+  var matchSel = null, matchDone = 0;
+
+  function initMatch() {
+    matchSel = null; matchDone = 0;
+    document.getElementById('matchReset').style.display = 'none';
+    document.getElementById('matchScore').innerHTML = '';
+    var pairs  = shuffleArr(MATCH_PAIRS.slice());
+    var rights = shuffleArr(MATCH_PAIRS.slice());
+    var leftEl  = document.getElementById('matchLeft');
+    var rightEl = document.getElementById('matchRight');
+    leftEl.innerHTML = ''; rightEl.innerHTML = '';
+    var i;
+    for (i = 0; i < pairs.length; i++) {
+      (function(p) {
+        var b = document.createElement('button');
+        b.className = 'match-item'; b.innerHTML = p.l;
+        b.dataset.key = p.key; b.dataset.side = 'l';
+        b.onclick = function() { matchTap(b); };
+        leftEl.appendChild(b);
+      })(pairs[i]);
+    }
+    for (i = 0; i < rights.length; i++) {
+      (function(p) {
+        var b = document.createElement('button');
+        b.className = 'match-item'; b.innerHTML = p.r;
+        b.dataset.key = p.key; b.dataset.side = 'r';
+        b.onclick = function() { matchTap(b); };
+        rightEl.appendChild(b);
+      })(rights[i]);
+    }
+  }
+
+  function matchTap(btn) {
+    if (btn.classList.contains('done') || btn.classList.contains('dis')) return;
+    if (!matchSel) { matchSel = btn; btn.classList.add('sel'); return; }
+    if (matchSel === btn) { matchSel.classList.remove('sel'); matchSel = null; return; }
+    if (matchSel.getAttribute('data-side') === btn.getAttribute('data-side')) {
+      matchSel.classList.remove('sel'); matchSel = btn; btn.classList.add('sel'); return;
+    }
+    matchAttempted = true;
+    tryMarkDone();
+    var a = matchSel, b = btn;
+    var ok = a.getAttribute('data-key') === b.getAttribute('data-key');
+    a.classList.remove('sel');
+    if (ok) {
+      a.classList.add('done'); b.classList.add('done');
+      matchDone++;
+      document.getElementById('matchScore').innerHTML = 'Пар найдено: <span>' + matchDone + '</span> из ' + MATCH_PAIRS.length;
+      if (matchDone === MATCH_PAIRS.length) { document.getElementById('matchReset').style.display = 'block'; }
+    } else {
+      a.classList.add('bad'); b.classList.add('bad');
+      setTimeout(function() { a.classList.remove('bad'); b.classList.remove('bad'); }, TIMING.matchShake);
+    }
+    matchSel = null;
+  }
+
+  /* ── Sort ── */
+  var SORT_NUMS = [3, 11, 7, 18, 0, 14];
+  var SORT_CORRECT = [0, 3, 7, 11, 14, 18];
+  var sortSelected = null;
+  var sortPlaced   = [];
+
+  function initSort() {
+    sortSelected = null;
+    sortPlaced   = [];
+    document.getElementById('sortCheckBtn').style.display = 'block';
+    document.getElementById('sortResetBtn').style.display = 'none';
+    document.getElementById('sortFb').textContent = '';
+
+    /* Числовая прямая — тики 0, 2, 4 … 20 */
+    var nlTicks = document.getElementById('sortNlTicks');
+    nlTicks.innerHTML = '';
+    var i;
+    for (i = 0; i <= 20; i += 2) {
+      var pct = i / 20;
+      var tick = document.createElement('div');
+      tick.className = 'sort-nl-tick' + (i % 4 === 0 ? ' major' : '');
+      tick.style.left = (pct * 100) + '%';
+      nlTicks.appendChild(tick);
+      if (i % 4 === 0) {
+        var lbl = document.createElement('div');
+        lbl.className = 'sort-nl-label';
+        lbl.style.left = (pct * 100) + '%';
+        lbl.textContent = i;
+        nlTicks.appendChild(lbl);
+      }
+    }
+
+    /* Банк */
+    var bank = document.getElementById('sortBank');
+    bank.innerHTML = '';
+    var shuffled = shuffleArr(SORT_NUMS.slice());
+    for (i = 0; i < shuffled.length; i++) {
+      (function(n) {
+        var chip = document.createElement('button');
+        chip.className = 'sort-chip';
+        chip.textContent = n;
+        chip.setAttribute('data-val', n);
+        chip.onclick = function() { sortChipTap(chip); };
+        bank.appendChild(chip);
+      })(shuffled[i]);
+    }
+
+    /* Слоты */
+    var result = document.getElementById('sortResult');
+    result.innerHTML = '';
+    for (i = 0; i < SORT_CORRECT.length; i++) {
+      var slot = document.createElement('div');
+      slot.className = 'sort-slot empty';
+      slot.textContent = '?';
+      slot.setAttribute('data-idx', i);
+      slot.onclick = function() { sortSlotTap(this); };
+      result.appendChild(slot);
+      sortPlaced.push(null);
+    }
+  }
+
+  function sortChipTap(chip) {
+    if (chip.classList.contains('placed')) return;
+    var chips = document.getElementById('sortBank').querySelectorAll('.sort-chip');
+    var i;
+    if (sortSelected && sortSelected === chip) {
+      chip.classList.remove('sel');
+      sortSelected = null;
+      return;
+    }
+    for (i = 0; i < chips.length; i++) { chips[i].classList.remove('sel'); }
+    chip.classList.add('sel');
+    sortSelected = chip;
+  }
+
+  function sortSlotTap(slot) {
+    var idx = parseInt(slot.getAttribute('data-idx'), 10);
+    if (sortSelected) {
+      sortAttempted = true;
+      tryMarkDone();
+      /* Если слот занят — вернуть прежний чип в банк */
+      if (sortPlaced[idx] !== null) {
+        var prev = document.querySelector('.sort-chip[data-val="' + sortPlaced[idx] + '"].placed');
+        if (prev) { prev.classList.remove('placed'); }
+      }
+      var val = parseInt(sortSelected.getAttribute('data-val'), 10);
+      sortPlaced[idx] = val;
+      slot.className = 'sort-slot';
+      slot.textContent = val;
+      sortSelected.classList.remove('sel');
+      sortSelected.classList.add('placed');
+      sortSelected = null;
+    } else if (sortPlaced[idx] !== null) {
+      /* Вернуть чип обратно */
+      var chip = document.querySelector('.sort-chip[data-val="' + sortPlaced[idx] + '"]');
+      if (chip) { chip.classList.remove('placed'); }
+      sortPlaced[idx] = null;
+      slot.className = 'sort-slot empty';
+      slot.textContent = '?';
+    }
+  }
+
+  function sortCheck() {
+    var slots = document.getElementById('sortResult').querySelectorAll('.sort-slot');
+    var correct = 0;
+    var i;
+    for (i = 0; i < slots.length; i++) {
+      if (sortPlaced[i] === SORT_CORRECT[i]) {
+        slots[i].className = 'sort-slot correct';
+        correct++;
+      } else {
+        slots[i].className = 'sort-slot wrong';
+      }
+    }
+    var fb = document.getElementById('sortFb');
+    if (correct === SORT_CORRECT.length) {
+      fb.textContent = 'Отлично! Все числа на правильных местах.';
+      fb.style.color = '#16A34A';
+      sortAttempted = true;
+      tryMarkDone();
+    } else {
+      fb.textContent = correct + ' из ' + SORT_CORRECT.length + ' верно. Подсказка: не забудь про 0 — он тоже должен быть первым.';
+      fb.style.color = '#C47C1A';
+    }
+    document.getElementById('sortCheckBtn').style.display = 'none';
+    document.getElementById('sortResetBtn').style.display = 'block';
+  }
+
+  /* ── Reading quiz ── */
+  var READ_QS = [
+    { q: 'Что общего у высотомера, тонометра и термометра духовки?',
+      opts: [
+        { text: 'Все измеряют температуру', correct: false },
+        { text: 'Все устроены как координатная прямая: нуль, равные деления, числа', correct: true },
+        { text: 'У всех одинаковый шаг деления', correct: false },
+        { text: 'Все придуманы в одно время', correct: false }
+      ]
+    },
+    { q: 'Почему у высотомера шаг 500, а не 1?',
+      opts: [
+        { text: 'Прибор не может показывать меньший шаг', correct: false },
+        { text: 'Это ошибка конструкторов', correct: false },
+        { text: 'Пилоту важен общий диапазон, а не точность до единицы — крупный шаг удобнее читать', correct: true },
+        { text: 'Самолёт летит слишком быстро для мелких делений', correct: false }
+      ]
+    },
+    { q: 'Что нужно знать, чтобы построить шкалу для любого прибора?',
+      opts: [
+        { text: 'Только максимальное значение', correct: false },
+        { text: 'Только шаг деления', correct: false },
+        { text: 'Диапазон значений и нужную точность — они определяют шаг', correct: true },
+        { text: 'Цвет и размер прибора', correct: false }
+      ]
+    }
+  ];
+
+  function initReadQuiz() {
+    var container = document.getElementById('readQs');
+    container.innerHTML = '';
+    var i;
+    for (i = 0; i < READ_QS.length; i++) {
+      (function(q) {
+        var block = document.createElement('div');
+        var qDiv = document.createElement('div');
+        qDiv.className = 'read-q-t'; qDiv.innerHTML = q.q;
+        block.appendChild(qDiv);
+        var optsDiv = document.createElement('div');
+        optsDiv.className = 'read-opts';
+        var shuffled = shuffleArr(q.opts);
+        var k;
+        for (k = 0; k < shuffled.length; k++) {
+          (function(opt) {
+            var btn = document.createElement('button');
+            btn.className = 'read-opt';
+            btn.innerHTML = opt.text;
+            btn.setAttribute('data-correct', opt.correct ? 'true' : 'false');
+            btn.onclick = function() {
+              if (!readAnswered[READ_QS.indexOf(q)]) {
+                readAnswered[READ_QS.indexOf(q)] = true;
+                readCount++;
+                if (readCount >= READ_QS.length) { readAttempted = true; tryMarkDone(); }
+              }
+              var btns = optsDiv.querySelectorAll('.read-opt');
+              var m;
+              for (m = 0; m < btns.length; m++) { btns[m].style.pointerEvents = 'none'; }
+              if (opt.correct) {
+                btn.classList.add('correct');
+              } else {
+                btn.classList.add('wrong');
+                for (m = 0; m < btns.length; m++) {
+                  if (btns[m].getAttribute('data-correct') === 'true') { btns[m].classList.add('correct'); }
+                }
+              }
+            };
+            optsDiv.appendChild(btn);
+          })(shuffled[k]);
+        }
+        block.appendChild(optsDiv);
+        container.appendChild(block);
+      })(READ_QS[i]);
+    }
+  }
+
+  /* ── Misconceptions ── */
+  var MISCONCEPTIONS = [
+    { imgId: 'node2_img3', imgRatio: '3/2', hasImg: false,
+      imgDesc: 'Ребёнок рисует прямую с числами 1, 2, 3, 4, 5 — нуля нет',
+      label: 'Координатная прямая может начинаться с любого числа?',
+      wrong: '«Координатная прямая — это просто числа по порядку, нуль не обязателен»',
+      whyWrong: 'На некоторых графиках ось обрезают и начинают не с нуля — это создаёт путаницу с координатной прямой.',
+      correct: 'Координатная прямая всегда начинается с нуля — это её главное условие. Нуль — точка отсчёта, от которой считаются все координаты. Без нуля координата теряет смысл: непонятно, от чего считать.',
+      hint: 'Нуль на координатной прямой — как адрес дома №0 на улице: без него все остальные номера теряют смысл.' },
+    { imgId: 'node2_img4', imgRatio: '3/2', hasImg: false,
+      imgDesc: 'Две линейки: одна с равными делениями, другая с неравными',
+      label: 'Деления на шкале могут быть разными?',
+      wrong: '«Деления могут быть разного размера — главное, чтобы числа шли по порядку»',
+      whyWrong: 'Числа действительно идут по порядку на любой шкале, поэтому кажется, что это главное условие.',
+      correct: 'Деления на координатной прямой всегда равные — это обязательное условие. Если деления разные, шкала врёт: расстояние между точками 1 и 2 будет визуально другим, чем между 4 и 5. Такой инструмент нельзя использовать для измерений.',
+      hint: 'Шкала с неравными делениями — как линейка с растянутыми сантиметрами: измеришь неправильно.' }
+  ];
+
+  /* ── Запомни ── */
+  var REMEMBER = [
+    'Координатная прямая — прямая с нулём и равными делениями',
+    'Нуль — обязательная точка отсчёта, без него координаты не считают',
+    'Координата точки — её расстояние от нуля',
+    'Расстояние между двумя точками = большая координата минус меньшая',
+    'Деления всегда равные — иначе шкала даёт неверные результаты',
+    'Шаг деления выбирают под задачу: точнее — меньше шаг'
+  ];
+
+  /* ── Проверь себя ── */
+  var SELFCHECK = [
+    'На шкале отмечены точки 4 и 9. Какое расстояние между ними?',
+    'Почему деления на координатной прямой должны быть равными?',
+    'Ты строишь шкалу для измерения веса посылок от 0 до 30. Какой шаг выберешь?',
+    'Чем координата точки отличается от расстояния между двумя точками?'
+  ];
+
+  /* ── Финальный квиз ── */
+  var QUIZ_QS = [
+    { q: 'Что такое координата точки на прямой?',
+      opts: ['Её порядковый номер среди всех точек', 'Расстояние от неё до соседней точки', 'Её расстояние от нуля', 'Число делений до конца шкалы'],
+      c: 2, explain: 'Координата — расстояние от точки отсчёта, то есть от нуля. Поэтому нуль на координатной прямой обязателен.' },
+    { q: 'На шкале градусника отметки стоят через 0,2 градуса. Какой шаг деления?',
+      opts: ['0,1', '0,2', '2', 'Зависит от диапазона шкалы'],
+      c: 1, explain: 'Шаг деления — расстояние между соседними отметками. Если отметки через 0,2 градуса, шаг равен 0,2.' },
+    { q: 'Точки A и B имеют координаты 6 и 15. Чему равно расстояние между ними?',
+      opts: ['6', '15', '21', '9'],
+      c: 3, explain: 'Расстояние между точками — разность координат: 15 − 6 = 9.' },
+    { q: 'Вася построил шкалу: 0, 1, 3, 6, 10. Что в ней неправильно?',
+      opts: ['Начинается с нуля — это лишнее', 'Числа не равноудалены — деления неравные', 'Чисел слишком мало', 'Ничего — числа идут по возрастанию'],
+      c: 1, explain: 'На координатной прямой деления всегда равные. Здесь расстояния разные: 1, 2, 3, 4 — такая шкала для измерений не подходит.' },
+    { q: 'Маша строит шкалу для данных от 120 до 180 и выбрала шаг 1. Почему это неудобно?',
+      opts: ['Шаг 1 слишком маленький — получится 60 делений, шкала перегружена', 'Шаг 1 слишком большой — данные не поместятся', 'Шаг должен равняться максимальному значению', 'Шаг 1 подходит для любых данных'],
+      c: 0, explain: '60 делений на одной шкале — трудно читать. Для диапазона 120–180 удобнее шаг 5 или 10: 12 или 6 делений.' }
+  ];
+
+  /* ── DYK ── */
+  var DYK = [
+    { tag: 'История', title: 'Муха, которая изменила математику',
+      teaser: 'Рене Декарт придумал координаты, наблюдая за мухой на потолке.',
+      hasImg: false, imgId: 'node2_img6',
+      imgDesc: 'Рене Декарт наблюдает за мухой на потолке, рядом сетка координат',
+      text: '<p>По легенде, в 1637 году французский математик Рене Декарт наблюдал за мухой на потолке. Он думал: как точно описать, где находится муха? И понял: нужно задать два числа — расстояние от левой стены и расстояние от дальней стены.</p>'
+          + '<p>Так появилась система координат. Координатная прямая — это одна ось такой системы. Именно поэтому координаты иногда называют «декартовыми» — в честь их изобретателя.</p>' },
+    { tag: 'Технологии', title: 'Штрихкод — это тоже шкала',
+      teaser: 'Полоски штрихкода — числа на координатной прямой, только записанные светом.',
+      hasImg: false, imgId: 'node2_img7',
+      imgDesc: 'Штрихкод на банке консервов крупным планом',
+      text: '<p>Штрихкод — это число, закодированное шириной и расположением полосок. Сканер считывает расстояния между полосками — то есть координаты на маленькой шкале длиной несколько сантиметров.</p>'
+          + '<p>Каждый товар в магазине имеет уникальный штрихкод из 13 цифр. Когда кассир проводит товар через сканер, луч света считывает координаты полосок и переводит их в число — артикул товара. Без координатной прямой — никакого штрихкода.</p>' }
+  ];
+
+  /* ── Прогресс узла ── */
+  var preCheckAttempted = false;
+  var checkAnswered     = false;
+  var matchAttempted    = false;
+  var sortAttempted     = false;
+  var readAttempted     = false;
+  var quizAttempted     = false;
+  var readAnswered      = {};
+  var readCount         = 0;
+
+  function tryMarkDone() {
+    if (preCheckAttempted && checkAnswered && matchAttempted && sortAttempted && readAttempted && quizAttempted) {
+      Progress.markDone('node2');
+    }
+  }
+
+  function checkAllDone() {
+    quizAttempted = true;
+    tryMarkDone();
+  }
+
+  /* ── Инициализация ── */
+  initPreCheck();
+  initCheck();
+  initGlossary();
+  initMatch();
+  initSort();
+  initReadQuiz();
+  initMisc();
+  initRemember();
+  initSelfcheck();
+  initQuiz();
+  initDYK();
+  updateSim(2);
+
+  window.onresize = function() { updateSim(document.getElementById('stepSlider').value); };
+
+</script>
+</body>
+</html>

@@ -520,6 +520,7 @@ function initCheck() {
 
 function chk(btn) {
   checkAnswered = true;
+  tryMarkDone();
   var correct = btn.getAttribute('data-correct') === 'true';
   var fb      = document.getElementById('checkFb');
   var wrap    = document.getElementById('checkOpts');
@@ -586,6 +587,8 @@ function renderSortProg() {
 
 function sortTap(cat) {
   if (sortAnswered) return;
+  sortAttempted = true;
+  tryMarkDone();
   var q    = sortItems[sortIdx];
   var card = document.getElementById('sortCard');
   var hint = document.getElementById('sortHint');
@@ -657,6 +660,7 @@ function initRead() {
 }
 
 function rdAns(btn, qi) {
+  if (!readAnswered[qi]) { readAnswered[qi] = true; readCount++; if (readCount >= READ_QS.length) { readAttempted = true; tryMarkDone(); } }
   var ok   = btn.getAttribute('data-correct') === 'true';
   var opts = btn.closest('.read-opts').querySelectorAll('.read-opt');
   var i;
@@ -678,7 +682,25 @@ var qAns = false;
 
 /* ── DYK ── */
 
-var checkAnswered = false;
+var checkAnswered  = false;
+
+/* ── Прогресс узла ── */
+var sortAttempted  = false;
+var readAttempted  = false;
+var quizAttempted  = false;
+var readAnswered   = {};
+var readCount      = 0;
+
+function tryMarkDone() {
+  if (checkAnswered && sortAttempted && readAttempted && quizAttempted) {
+    Progress.markDone('node2');
+  }
+}
+
+function checkAllDone() {
+  quizAttempted = true;
+  tryMarkDone();
+}
 
 /* ── Инициализация ── */
 

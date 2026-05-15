@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Что такое дробь? — Блок 5</title>
+  <title>Числа вокруг нас — Блок 1</title>
   <link rel="stylesheet" href="../shared.css">
   <link rel="stylesheet" href="../shared-poster.css">
   <style>
-    /* Координаты тапаемых зон — уникальны для этого плаката (горизонтальные полосы) */
-    .zone1 { top: 13%; left: 2%; width: 96%; height: 19%; }
-    .zone2 { top: 34%; left: 2%; width: 96%; height: 26%; }
-    .zone3 { top: 61%; left: 2%; width: 96%; height: 17%; }
-    .zone4 { top: 79%; left: 2%; width: 96%; height: 14%; }
+    /* Координаты тапаемых зон — уникальны для этого плаката (сетка 2x2) */
+    .zone1 { top: 19%; left: 2%; width: 47%; height: 32.7%; }
+    .zone2 { top: 19%; left: 51%; width: 47%; height: 32.7%; }
+    .zone3 { top: 53%; left: 2%; width: 47%; height: 31.5%; }
+    .zone4 { top: 53%; left: 51%; width: 47%; height: 31.5%; }
   </style>
 </head>
 <body>
@@ -29,87 +29,90 @@
 
   <!-- Шапка блока -->
   <div class="col block-header">
-    <div class="block-eyebrow">Математика · 5 класс · Блок 5</div>
-    <div class="block-title">Что такое <span>дробь?</span></div>
-    <div class="block-subtitle">Часть целого · числитель и знаменатель ·<br>правильные и неправильные · числовая прямая</div>
+    <div class="block-eyebrow">Математика · 5 класс · Блок 1</div>
+    <div class="block-title">Числа <span>вокруг нас</span></div>
+    <div class="block-subtitle">Натуральные числа · координатная прямая ·<br>сравнение и округление · таблицы и диаграммы</div>
   </div>
 
   <!-- Плакат с тапаемыми зонами -->
   <div class="col-full poster-wrap">
-    <img class="poster-img" src="poster.png" alt="Что такое дробь" draggable="false">
+    <img class="poster-img" src="poster.png" alt="Числа вокруг нас" draggable="false">
 
+    <!-- Зона 1 — Натуральные числа (верхний левый) -->
     <div class="tap-zone zone1" id="zone1" onclick="goNode(1)">
       <div class="zone-overlay"></div>
       <div class="zone-label">
         <div class="zone-label-num">
-            <svg width="22" height="22" viewBox="0 0 256 256" fill="white">
-              <path d="M196,84a31.94,31.94,0,0,0-11.22,2A32,32,0,0,0,148,69V44a32,32,0,0,0-64,0v66.83A32,32,0,0,0,32.25,148l4.68,8.24C71.11,216.48,86.72,244,136,244a92.1,92.1,0,0,0,92-92V116A32,32,0,0,0,196,84Zm8,68a68.08,68.08,0,0,1-68,68c-34,0-43.49-14.45-78.2-75.65l-4.69-8.28a.16.16,0,0,1,0-.07,8,8,0,0,1,13.86-8c.06.12.13.23.2.35l18.68,30A12,12,0,0,0,108,152V44a8,8,0,0,1,16,0v68a12,12,0,0,0,24,0V100a8,8,0,0,1,16,0v20a12,12,0,0,0,24,0v-4a8,8,0,0,1,16,0Z"/>
-            </svg>
-          </div>
-        <div class="zone-label-text">Доли и дроби</div>
+          <svg width="22" height="22" viewBox="0 0 256 256" fill="white">
+            <path d="M196,84a31.94,31.94,0,0,0-11.22,2A32,32,0,0,0,148,69V44a32,32,0,0,0-64,0v66.83A32,32,0,0,0,32.25,148l4.68,8.24C71.11,216.48,86.72,244,136,244a92.1,92.1,0,0,0,92-92V116A32,32,0,0,0,196,84Zm8,68a68.08,68.08,0,0,1-68,68c-34,0-43.49-14.45-78.2-75.65l-4.69-8.28a.16.16,0,0,1,0-.07,8,8,0,0,1,13.86-8c.06.12.13.23.2.35l18.68,30A12,12,0,0,0,108,152V44a8,8,0,0,1,16,0v68a12,12,0,0,0,24,0V100a8,8,0,0,1,16,0v20a12,12,0,0,0,24,0v-4a8,8,0,0,1,16,0Z"/>
+          </svg>
+        </div>
+        <div class="zone-label-text">Натуральные числа</div>
         <div class="zone-label-arrow">→</div>
       </div>
-      <div class="done-badge" id="badge1" style="position:absolute;top:8px;right:8px;">
+      <div class="done-badge" id="badge1" style="position:absolute;bottom:8px;right:8px;">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path d="M2 7L5.5 10.5L12 3.5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
     </div>
 
+    <!-- Зона 2 — Координатная прямая (верхний правый) -->
     <div class="tap-zone zone2" id="zone2" onclick="goNode(2)">
       <div class="zone-overlay"></div>
       <div class="zone-label">
         <div class="zone-label-num">
-            <svg width="22" height="22" viewBox="0 0 256 256" fill="white">
-              <path d="M196,84a31.94,31.94,0,0,0-11.22,2A32,32,0,0,0,148,69V44a32,32,0,0,0-64,0v66.83A32,32,0,0,0,32.25,148l4.68,8.24C71.11,216.48,86.72,244,136,244a92.1,92.1,0,0,0,92-92V116A32,32,0,0,0,196,84Zm8,68a68.08,68.08,0,0,1-68,68c-34,0-43.49-14.45-78.2-75.65l-4.69-8.28a.16.16,0,0,1,0-.07,8,8,0,0,1,13.86-8c.06.12.13.23.2.35l18.68,30A12,12,0,0,0,108,152V44a8,8,0,0,1,16,0v68a12,12,0,0,0,24,0V100a8,8,0,0,1,16,0v20a12,12,0,0,0,24,0v-4a8,8,0,0,1,16,0Z"/>
-            </svg>
-          </div>
-        <div class="zone-label-text">Правильные и неправильные</div>
+          <svg width="22" height="22" viewBox="0 0 256 256" fill="white">
+            <path d="M196,84a31.94,31.94,0,0,0-11.22,2A32,32,0,0,0,148,69V44a32,32,0,0,0-64,0v66.83A32,32,0,0,0,32.25,148l4.68,8.24C71.11,216.48,86.72,244,136,244a92.1,92.1,0,0,0,92-92V116A32,32,0,0,0,196,84Zm8,68a68.08,68.08,0,0,1-68,68c-34,0-43.49-14.45-78.2-75.65l-4.69-8.28a.16.16,0,0,1,0-.07,8,8,0,0,1,13.86-8c.06.12.13.23.2.35l18.68,30A12,12,0,0,0,108,152V44a8,8,0,0,1,16,0v68a12,12,0,0,0,24,0V100a8,8,0,0,1,16,0v20a12,12,0,0,0,24,0v-4a8,8,0,0,1,16,0Z"/>
+          </svg>
+        </div>
+        <div class="zone-label-text">Координатная прямая</div>
         <div class="zone-label-arrow">→</div>
       </div>
-      <div class="done-badge" id="badge2" style="position:absolute;top:8px;right:8px;">
+      <div class="done-badge" id="badge2" style="position:absolute;bottom:8px;right:8px;">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path d="M2 7L5.5 10.5L12 3.5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
     </div>
 
+    <!-- Зона 3 — Сравнение и округление (нижний левый) -->
     <div class="tap-zone zone3" id="zone3" onclick="goNode(3)">
       <div class="zone-overlay"></div>
       <div class="zone-label">
         <div class="zone-label-num">
-            <svg width="22" height="22" viewBox="0 0 256 256" fill="white">
-              <path d="M196,84a31.94,31.94,0,0,0-11.22,2A32,32,0,0,0,148,69V44a32,32,0,0,0-64,0v66.83A32,32,0,0,0,32.25,148l4.68,8.24C71.11,216.48,86.72,244,136,244a92.1,92.1,0,0,0,92-92V116A32,32,0,0,0,196,84Zm8,68a68.08,68.08,0,0,1-68,68c-34,0-43.49-14.45-78.2-75.65l-4.69-8.28a.16.16,0,0,1,0-.07,8,8,0,0,1,13.86-8c.06.12.13.23.2.35l18.68,30A12,12,0,0,0,108,152V44a8,8,0,0,1,16,0v68a12,12,0,0,0,24,0V100a8,8,0,0,1,16,0v20a12,12,0,0,0,24,0v-4a8,8,0,0,1,16,0Z"/>
-            </svg>
-          </div>
-        <div class="zone-label-text">Смешанные числа</div>
+          <svg width="22" height="22" viewBox="0 0 256 256" fill="white">
+            <path d="M196,84a31.94,31.94,0,0,0-11.22,2A32,32,0,0,0,148,69V44a32,32,0,0,0-64,0v66.83A32,32,0,0,0,32.25,148l4.68,8.24C71.11,216.48,86.72,244,136,244a92.1,92.1,0,0,0,92-92V116A32,32,0,0,0,196,84Zm8,68a68.08,68.08,0,0,1-68,68c-34,0-43.49-14.45-78.2-75.65l-4.69-8.28a.16.16,0,0,1,0-.07,8,8,0,0,1,13.86-8c.06.12.13.23.2.35l18.68,30A12,12,0,0,0,108,152V44a8,8,0,0,1,16,0v68a12,12,0,0,0,24,0V100a8,8,0,0,1,16,0v20a12,12,0,0,0,24,0v-4a8,8,0,0,1,16,0Z"/>
+          </svg>
+        </div>
+        <div class="zone-label-text">Сравнение и округление</div>
         <div class="zone-label-arrow">→</div>
       </div>
-      <div class="done-badge" id="badge3" style="position:absolute;top:8px;right:8px;">
+      <div class="done-badge" id="badge3" style="position:absolute;bottom:8px;right:8px;">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path d="M2 7L5.5 10.5L12 3.5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
     </div>
 
+    <!-- Зона 4 — Таблицы и диаграммы (нижний правый) -->
     <div class="tap-zone zone4" id="zone4" onclick="goNode(4)">
       <div class="zone-overlay"></div>
       <div class="zone-label">
         <div class="zone-label-num">
-            <svg width="22" height="22" viewBox="0 0 256 256" fill="white">
-              <path d="M196,84a31.94,31.94,0,0,0-11.22,2A32,32,0,0,0,148,69V44a32,32,0,0,0-64,0v66.83A32,32,0,0,0,32.25,148l4.68,8.24C71.11,216.48,86.72,244,136,244a92.1,92.1,0,0,0,92-92V116A32,32,0,0,0,196,84Zm8,68a68.08,68.08,0,0,1-68,68c-34,0-43.49-14.45-78.2-75.65l-4.69-8.28a.16.16,0,0,1,0-.07,8,8,0,0,1,13.86-8c.06.12.13.23.2.35l18.68,30A12,12,0,0,0,108,152V44a8,8,0,0,1,16,0v68a12,12,0,0,0,24,0V100a8,8,0,0,1,16,0v20a12,12,0,0,0,24,0v-4a8,8,0,0,1,16,0Z"/>
-            </svg>
-          </div>
-        <div class="zone-label-text">Числовая прямая</div>
+          <svg width="22" height="22" viewBox="0 0 256 256" fill="white">
+            <path d="M196,84a31.94,31.94,0,0,0-11.22,2A32,32,0,0,0,148,69V44a32,32,0,0,0-64,0v66.83A32,32,0,0,0,32.25,148l4.68,8.24C71.11,216.48,86.72,244,136,244a92.1,92.1,0,0,0,92-92V116A32,32,0,0,0,196,84Zm8,68a68.08,68.08,0,0,1-68,68c-34,0-43.49-14.45-78.2-75.65l-4.69-8.28a.16.16,0,0,1,0-.07,8,8,0,0,1,13.86-8c.06.12.13.23.2.35l18.68,30A12,12,0,0,0,108,152V44a8,8,0,0,1,16,0v68a12,12,0,0,0,24,0V100a8,8,0,0,1,16,0v20a12,12,0,0,0,24,0v-4a8,8,0,0,1,16,0Z"/>
+          </svg>
+        </div>
+        <div class="zone-label-text">Таблицы и диаграммы</div>
         <div class="zone-label-arrow">→</div>
       </div>
-      <div class="done-badge" id="badge4" style="position:absolute;top:8px;right:8px;">
+      <div class="done-badge" id="badge4" style="position:absolute;bottom:8px;right:8px;">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
           <path d="M2 7L5.5 10.5L12 3.5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </div>
     </div>
-
 
   </div>
 
@@ -119,22 +122,22 @@
     <div class="pnodes">
       <div class="pnode" id="pnode1" onclick="goNode(1)">
         <div class="pnode-n">1</div>
-        <div class="pnode-t">Доли и дроби</div>
+        <div class="pnode-t">Натуральные числа</div>
         <div class="pnode-v">✓</div>
       </div>
       <div class="pnode" id="pnode2" onclick="goNode(2)">
         <div class="pnode-n">2</div>
-        <div class="pnode-t">Правильные и неправ.</div>
+        <div class="pnode-t">Коорд. прямая</div>
         <div class="pnode-v">✓</div>
       </div>
       <div class="pnode" id="pnode3" onclick="goNode(3)">
         <div class="pnode-n">3</div>
-        <div class="pnode-t">Смешанные числа</div>
+        <div class="pnode-t">Сравнение и округл.</div>
         <div class="pnode-v">✓</div>
       </div>
       <div class="pnode" id="pnode4" onclick="goNode(4)">
         <div class="pnode-n">4</div>
-        <div class="pnode-t">Числовая прямая</div>
+        <div class="pnode-t">Таблицы и диагр.</div>
         <div class="pnode-v">✓</div>
       </div>
     </div>
@@ -142,20 +145,21 @@
 
   <!-- Навигация между плакатами -->
   <div class="col poster-nav">
-    <a href="#" class="poster-nav-btn" onclick="alert('Предыдущий плакат — скоро')">
+    <div class="poster-nav-btn disabled">
       <div class="pnb-dir">Предыдущий плакат</div>
-      <div class="pnb-title">Фигуры на плоскости</div>
+      <div class="pnb-title">—</div>
       <div class="pnb-arrow">←</div>
-    </a>
-    <a href="#" class="poster-nav-btn next" onclick="alert('Следующий плакат — скоро')">
+    </div>
+    <a href="../block2/index.html" class="poster-nav-btn next">
       <div class="pnb-dir">Следующий плакат</div>
-      <div class="pnb-title">Преобразование дробей</div>
+      <div class="pnb-title">Четыре действия</div>
       <div class="pnb-arrow">→</div>
     </a>
   </div>
 
   <script src="../shared.js"></script>
   <script>
+    BLOCK_ID = 'math5_block1';
     function initProgress() {
       document.getElementById('doneCount').textContent = Progress.countDone();
       var doneZones = [];
@@ -197,7 +201,6 @@
       if (seqPaused) return;
       clearAllGlow();
 
-      /* Ищем следующую незавершённую зону начиная с seqIdx */
       var found = -1;
       for (var attempt = 0; attempt < 4; attempt++) {
         var candidate = seqZones[(seqIdx + attempt) % 4];
@@ -208,7 +211,7 @@
         if (!isDone) { found = candidate; seqIdx = (seqIdx + attempt + 1) % 4; break; }
       }
 
-      if (found === -1) return; /* Все пройдены */
+      if (found === -1) return;
 
       var el = document.getElementById('zone' + found);
       if (el) el.classList.add('seq-active');
@@ -219,7 +222,6 @@
       }, 1800);
     }
 
-    /* Пауза при наведении на плакат */
     var posterWrap = document.querySelector('.poster-wrap');
     if (posterWrap) {
       posterWrap.addEventListener('mouseenter', function() {

@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Узел 1 · Натуральное число и нуль</title>
+  <link rel="stylesheet" href="../shared.css">
+  <style>
+    /* Лента времени */
+    .timeline-track {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      padding: 8px 8px 0;
+      margin-bottom: 16px;
+    }
+    .timeline-track::before {
+      content: '';
+      position: absolute;
+      left: 8px; right: 8px; top: 30px;
+      height: 3px;
+      background: #E0D8CC;
+      z-index: 0;
+    }
+    .tl-dot {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: #fff; border: 2.5px solid #E0D8CC;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-main); font-size: 10px; font-weight: 800;
+      color: #AAA098; cursor: pointer; position: relative; z-index: 1;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      flex-shrink: 0; text-align: center; line-height: 1.2;
+    }
+    .tl-dot:active { transform: scale(0.93); }
+    .tl-dot.active { border-color: #C47C1A; background: #C47C1A; color: #fff; }
+    .tl-dot.visited { border-color: #C47C1A; color: #C47C1A; }
+    .tl-card {
+      background: #FFF8ED; border: 1.5px solid rgba(196,124,26,0.3);
+      border-radius: 14px; overflow: hidden; display: none; margin-top: 4px;
+    }
+    .tl-card.show { display: block; }
+    .tl-card-ph {
+      width: 100%; aspect-ratio: 16/7; background: #EDE6D8;
+      border-bottom: 1.5px dashed #C4B89A;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 6px;
+    }
+    .tl-card-ph-icon { font-size: 22px; opacity: 0.4; }
+    .tl-card-ph-desc { font-size: 11px; color: #8C7A60; font-weight: 600; text-align: center; line-height: 1.4; padding: 0 12px; }
+    .tl-card-body { padding: 14px 16px; }
+    .tl-card-era { font-family: var(--font-main); font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #C47C1A; margin-bottom: 6px; }
+    .tl-card-what { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; line-height: 1.45; }
+    .tl-card-missing { font-size: 14px; color: #666; line-height: 1.5; margin-bottom: 8px; }
+    .tl-card-q { font-size: 14px; font-style: italic; color: #888; border-top: 1px solid rgba(196,124,26,0.2); padding-top: 8px; line-height: 1.5; }
+    .tl-nav { display: flex; gap: 8px; justify-content: space-between; margin-top: 12px; }
+    .tl-nav-btn {
+      flex: 1; background: #fff; border: 1.5px solid #E0D8CC;
+      border-radius: 10px; padding: 9px 12px; font-family: var(--font-main);
+      font-size: 13px; font-weight: 700; color: #555; cursor: pointer;
+      -webkit-tap-highlight-color: transparent; transition: background 0.15s;
+    }
+    .tl-nav-btn:active { background: #EDE8DF; }
+    .tl-nav-btn.pri { border-color: #C47C1A; color: #C47C1A; }
+    @media (min-width: 600px) {
+      .tl-dot { width: clamp(44px,6vw,58px); height: clamp(44px,6vw,58px); font-size: clamp(10px,1.5vw,13px); }
+      .tl-card-era { font-size: clamp(11px,1.8vw,14px); }
+      .tl-card-what { font-size: clamp(15px,2.3vw,19px); }
+      .tl-card-missing { font-size: clamp(14px,2.2vw,18px); }
+      .tl-card-q { font-size: clamp(14px,2.2vw,17px); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-badge">1</div>
+    <div class="topbar-title">Натуральное число и нуль</div>
+    <a href="index.html" class="topbar-back">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      На плакат
+    </a>
+  </div>
+</div>
+
+<div class="page">
+<div class="col">
+
+  <!-- 1. HOOK -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="#0D0C59"><path d="M11.95 18q.525 0 .888-.363t.362-.887t-.362-.888t-.888-.362t-.887.363t-.363.887t.363.888t.887.362m.05 4q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m.1-12.3q.625 0 1.088.4t.462 1q0 .55-.337.975t-.763.8q-.575.5-1.012 1.1t-.438 1.35q0 .35.263.588t.612.237q.375 0 .638-.25t.337-.625q.1-.525.45-.937t.75-.788q.575-.55.988-1.2t.412-1.45q0-1.275-1.037-2.087T12.1 6q-.95 0-1.812.4T8.975 7.625q-.175.3-.112.638t.337.512q.35.2.725.125t.625-.425q.275-.375.688-.575t.862-.2"/></svg></div><span class="sec-pill-text">Подумай перед началом</span></div></div>
+    <div class="hook-card">
+      <div class="img-placeholder img-ph-16-7">
+        <div class="img-placeholder-icon">🏛</div>
+        <div class="img-placeholder-id">node1_img1</div>
+        <div class="img-placeholder-desc">Глиняная табличка с клинописными числами рядом со смартфоном с калькулятором</div>
+      </div>
+      <div class="hook-text-wrap">
+        <div class="hook-label">Вопрос</div>
+        <div class="hook-text">5000 лет назад шумерский торговец записал на глиняной табличке сколько мешков зерна он продал и кому должен вернуть долг. Эти таблички сохранились до сих пор. Числа, которые он использовал, — те же самые, что ты используешь сегодня, решая задачу по математике.<br><br>Но среди всех этих чисел одного не было. Его придумали позже всех — и без него современная математика была бы невозможна. <strong>Что это за число?</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. СИМУЛЯЦИЯ — ЛЕНТА ВРЕМЕНИ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 512 512" fill="#0D0C59"><path fill-rule="evenodd" d="M421.935 90.066c2.286 2.287 5.356 7.973 4.013 21.398c-1.323 13.221-6.731 30.687-16.845 51.505a306 306 0 0 1-3.77 7.492v42.31c39.823-61.993 54.037-115.44 31.687-137.79c-22.529-22.528-76.652-7.907-139.277 32.646l20.879 12.054c10.535-6.46 20.717-12.073 30.411-16.783c20.817-10.114 38.283-15.522 51.504-16.845c13.425-1.343 19.112 1.727 21.398 4.013M405.333 341.54v-42.31c39.823 61.993 54.037 115.44 31.687 137.79c-22.536 22.536-76.689 7.897-139.341-32.687l20.877-12.053c10.559 6.477 20.763 12.104 30.477 16.823c20.817 10.114 38.283 15.522 51.505 16.845c13.424 1.343 19.111-1.727 21.397-4.013c2.287-2.287 5.357-7.973 4.013-21.398c-1.322-13.221-6.73-30.687-16.845-51.505a306 306 0 0 0-3.77-7.492m-211.888 50.74l20.876 12.053c-62.651 40.584-116.804 55.223-139.34 32.687c-22.35-22.35-8.136-75.795 31.686-137.788v42.31a309 309 0 0 0-3.769 7.49c-10.114 20.818-15.522 38.284-16.845 51.505c-1.343 13.425 1.727 19.111 4.013 21.398c2.287 2.286 7.973 5.356 21.398 4.013c13.221-1.323 30.687-6.731 51.505-16.845c9.713-4.719 19.917-10.346 30.476-16.823M74.981 74.981c-22.35 22.35-8.136 75.795 31.686 137.788v-42.311a308 308 0 0 1-3.769-7.489c-10.114-20.818-15.522-38.284-16.845-51.505c-1.343-13.425 1.727-19.111 4.013-21.398c2.287-2.286 7.973-5.356 21.398-4.013c13.221 1.323 30.687 6.73 51.505 16.845c9.693 4.709 19.874 10.322 30.41 16.782l20.878-12.054C151.633 67.074 97.51 52.453 74.981 74.981M256 108.16l128 73.901v147.801l-128 73.901l-128-73.901V182.06zm85.333 123.132v73.937l-64 36.95v-73.937zm-106.666 36.95v73.937l-64-36.95v-73.937zM256 231.291l-63.969-36.933L256 157.426l63.969 36.932z" clip-rule="evenodd"/></svg></div><span class="sec-pill-text">Симуляция — нажми на точку</span></div></div>
+    <div class="card">
+      <div style="padding:16px 16px 8px;">
+        <div class="timeline-track" id="tlTrack">
+          <div class="tl-dot" id="tlDot0" onclick="tlTap(0)">~3000<br>до н.э.</div>
+          <div class="tl-dot" id="tlDot1" onclick="tlTap(1)">~2000<br>до н.э.</div>
+          <div class="tl-dot" id="tlDot2" onclick="tlTap(2)">~500<br>до н.э.</div>
+          <div class="tl-dot" id="tlDot3" onclick="tlTap(3)">~200<br>н.э.</div>
+          <div class="tl-dot" id="tlDot4" onclick="tlTap(4)">~800<br>н.э.</div>
+        </div>
+        <div class="tl-card" id="tlCard"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. ЧЕК-ВОПРОС -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="#0D0C59"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m1 17h-2v-2h2zm2.07-7.75-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25"/></svg></div><span class="sec-pill-text">Чек-вопрос</span></div></div>
+    <div class="card">
+      <div class="check-wrap">
+        <div class="check-q">Почему нуль появился позже всех остальных цифр?</div>
+        <div class="check-opts" id="checkOpts"></div>
+        <div class="check-fb" id="checkFb"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ОБЪЯСНЕНИЕ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="#0D0C59"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74c0-3.86-3.14-7-7-7m2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A5 5 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1"/></svg></div><span class="sec-pill-text">Главная идея</span></div></div>
+    <div class="card">
+      <div class="expl-block">
+        <div class="expl-lbl">Как это работает</div>
+        <div class="expl-t">Натуральные числа — это числа для счёта предметов: 1, 2, 3, 4… Они появились раньше всех остальных чисел — потому что счёт нужен был с самого начала. Нуль — особенный: он не считает предметы, он обозначает их <strong>отсутствие</strong>. Поэтому его придумали отдельно и позже.</div>
+      </div>
+      <div class="expl-block">
+        <div class="expl-lbl">Нуль держит место в числе</div>
+        <div class="expl-t">Без нуля невозможна современная запись чисел. Число 305 — это три сотни, <strong>ноль десятков</strong>, пять единиц. Если убрать нуль, 305 и 35 станут неотличимы. Вся арифметика держится на том, что нуль занимает место в числе.</div>
+      </div>
+      <div class="expl-block">
+        <div class="expl-lbl">Нуль — точка отсчёта</div>
+        <div class="expl-t">Нуль — это не «пусто», а конкретная точка отсчёта. На термометре нуль — это ноль градусов, вполне конкретная температура. В программировании нуль — одно из двух состояний, на которых держится всё цифровое.</div>
+      </div>
+      <div class="expl-block">
+        <div class="expl-lbl">Не путай</div>
+        <div class="expl-alert">Нуль — <strong>не натуральное число</strong>. Натуральные числа начинаются с 1. Нуль стоит рядом с ними в ряду чисел, но в другой «команде».</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ОПОРНЫЙ КОНСПЕКТ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="#0D0C59"><path d="M5 3c-1.11 0-2 .89-2 2v14c0 1.11.89 2 2 2h14c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 2h14v14H5zm2 2v2h10V7zm0 4v2h10v-2zm0 4v2h7v-2z"/></svg></div><span class="sec-pill-text">Опорный конспект</span></div></div>
+    <button class="cs-toggle" id="csToggle" onclick="toggleCS()">
+      <span>Открыть — читай перед контрольной</span>
+      <span class="cs-toggle-icon">&#9662;</span>
+    </button>
+    <div class="cs-body card" id="csBody">
+      <div class="cs-block">
+        <div class="cs-lbl">Что это</div>
+        <div class="cs-text">Натуральные числа — числа для счёта предметов: 1, 2, 3, 4, 5… Начинаются с 1, бесконечны. Нуль — отдельное число, обозначает отсутствие.</div>
+      </div>
+      <div class="cs-block">
+        <div class="cs-lbl">Главные факты</div>
+        <div class="cs-list">
+          <div class="cs-item">Первые числа появились около 5000 лет назад в Шумере</div>
+          <div class="cs-item">Нуль как цифру изобрели в Индии около 200–500 н.э.</div>
+          <div class="cs-item">Арабские цифры 0–9 пришли в Европу около 800 н.э.</div>
+          <div class="cs-item">Натуральный ряд бесконечен: после любого числа есть следующее</div>
+          <div class="cs-item">Цифр всего 10 (0–9), а чисел бесконечно много</div>
+        </div>
+      </div>
+      <div class="cs-block">
+        <div class="cs-lbl">Не путать</div>
+        <div class="cs-confusion">
+          <div class="cs-conf-row">
+            <div class="cs-conf-wrong">«Нуль — тоже натуральное число» — неверно</div>
+            <div class="cs-conf-right">Натуральные начинаются с 1. Нуль появился позже и обозначает отсутствие, а не количество.</div>
+          </div>
+          <div class="cs-conf-row">
+            <div class="cs-conf-wrong">«Цифра 5 и число 5 — одно и то же» — неверно</div>
+            <div class="cs-conf-right">Цифра — знак записи (0–9, всего 10). Число — количество или величина. Число 25 записывается двумя цифрами.</div>
+          </div>
+        </div>
+      </div>
+      <div class="cs-block">
+        <div class="cs-lbl">Приём для запоминания</div>
+        <div class="cs-hint">Натуральные — числа, которые отвечают на вопрос «сколько предметов?». Цифры — буквы математики, числа — слова.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ГЛОССАРИЙ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 256 256" fill="#0D0C59"><path d="M85.43 53.45a6 6 0 0 0-10.86 0l-64 136a6 6 0 1 0 10.86 5.11L38.63 158h82.74l17.2 36.55a6 6 0 1 0 10.86-5.11ZM44.28 146L80 70.09L115.72 146ZM200 98c-12.21 0-21.71 3.28-28.23 9.74a6 6 0 0 0 8.46 8.52c4.18-4.15 10.84-6.26 19.77-6.26c14.34 0 26 9.87 26 22v7.24a40.36 40.36 0 0 0-26-9.24c-20.95 0-38 15.25-38 34s17.05 34 38 34a40.36 40.36 0 0 0 26-9.24V192a6 6 0 0 0 12 0v-60c0-18.75-17-34-38-34m0 88c-14.34 0-26-9.87-26-22s11.66-22 26-22s26 9.87 26 22s-11.66 22-26 22"/></svg></div><span class="sec-pill-text">Глоссарий — тапни чтобы открыть</span></div></div>
+    <div class="gloss-list" id="glossList"></div>
+  </div>
+
+  <!-- 7. ТРЕНАЖЁР — MATCH -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-train"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#854D0E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="15" width="7" height="7" rx="1"/><rect x="14" y="15" width="7" height="7" rx="1"/><path d="M10 7.5h4M10 18.5h4"/></svg></div><span class="sec-pill-text">Тренажёр — установи соответствие</span></div></div>
+    <div class="card">
+      <div class="match-wrap">
+        <div class="match-header">Что означает нуль в этом числе?</div>
+        <div class="match-cols" id="matchCols">
+          <div class="match-col" id="matchLeft"></div>
+          <div class="match-col" id="matchRight"></div>
+        </div>
+        <div class="match-score" id="matchScore"></div>
+        <button class="match-reset" id="matchReset" onclick="initMatch()">Ещё раз</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. ЧТЕНИЕ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0D0C59" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="M11 16.5s1.5.5 2.25 2.5c0 0 3.573-5.833 6.75-7"/><path d="M4 5h14M4 10h11M4 15h4"/></svg></div><span class="sec-pill-text">Читай и отвечай</span></div></div>
+    <div class="card">
+      <div class="read-tag">Как нуль победил римские цифры</div>
+      <div class="img-placeholder img-ph-16-7" style="border-radius:8px;margin-bottom:4px;">
+        <div class="img-placeholder-icon">📜</div>
+        <div class="img-placeholder-id">node1_img9</div>
+        <div class="img-placeholder-desc">Средневековая рукопись с римскими цифрами рядом с листом бумаги с арабскими цифрами</div>
+      </div>
+      <div class="read-text">
+        <p>До появления нуля люди умели считать, но не умели записывать числа компактно. Римские цифры — хороший пример: число 1988 записывалось как MCMLXXXVIII. Это 13 знаков вместо 4.</p>
+        <p>Когда в Европу пришли арабские цифры с нулём, запись чисел стала позиционной: каждая цифра занимает строго своё место, и нуль держит это место, если в нём нет других единиц.</p>
+        <p>Именно это сделало возможным сложение столбиком, умножение в столбик и все алгоритмы, которые ты учишь в школе. Без нуля — никакого столбика.</p>
+      </div>
+      <div class="read-qs" id="readQs"></div>
+    </div>
+  </div>
+
+  <!-- 9. MISCONCEPTIONS -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-err"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9A3412" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L2 21h20L12 3z"/><path d="M12 10v4M12 17v.5"/></svg></div><span class="sec-pill-text">Так часто думают — но это неверно</span></div></div>
+    <div class="misc-grid" id="miscGrid"></div>
+    <div class="misc-panel" id="miscPanel"></div>
+  </div>
+
+  <!-- 10. ЗАПОМНИ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-train"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#854D0E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18l7-4 7 4V3H5z"/></svg></div><span class="sec-pill-text">Запомни</span></div></div>
+    <div class="remember-list" id="rememberList"></div>
+  </div>
+
+  <!-- 11. ПРОВЕРЬ СЕБЯ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-train"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#854D0E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg></div><span class="sec-pill-text">Проверь себя</span></div></div>
+    <div class="selfcheck-list" id="selfcheckList"></div>
+  </div>
+
+  <!-- 12. ФИНАЛЬНЫЙ КВИЗ -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-train"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#854D0E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3L4 14h7l-1 7 9-11h-7l1-7z"/></svg></div><span class="sec-pill-text">Финальный квиз</span></div></div>
+    <div class="card">
+      <div class="quiz-prog" id="qProg"></div>
+      <div class="quiz-qw" id="qCard"></div>
+    </div>
+  </div>
+
+  <!-- 13. DYK -->
+  <div class="sec">
+    <div class="sec-title"><div class="sec-pill sp-learn"><div class="sec-pill-icon"><svg width="28" height="28" viewBox="0 0 56 56" fill="#0D0C59"><path d="M28 51.906c13.055 0 23.906-10.828 23.906-23.906c0-13.055-10.875-23.906-23.93-23.906C14.899 4.094 4.095 14.945 4.095 28c0 13.078 10.828 23.906 23.906 23.906m0-3.984C16.937 47.922 8.1 39.062 8.1 28c0-11.04 8.813-19.922 19.876-19.922c11.039 0 19.921 8.883 19.945 19.922c.023 11.063-8.883 19.922-19.922 19.922m-.023-15.68c1.124 0 1.757-.633 1.78-1.851l.352-12.375c.024-1.196-.914-2.086-2.156-2.086c-1.266 0-2.156.867-2.133 2.062l.305 12.399c.023 1.195.68 1.851 1.852 1.851m0 7.617c1.335 0 2.53-1.078 2.53-2.437c0-1.383-1.171-2.438-2.53-2.438c-1.383 0-2.532 1.078-2.532 2.438c0 1.336 1.172 2.437 2.532 2.437"/></svg></div><span class="sec-pill-text">Знаешь ли ты что...</span></div></div>
+    <div class="dyk-grid" id="dykGrid"></div>
+    <div class="dyk-panel" id="dykPanel"></div>
+  </div>
+
+</div>
+</div>
+
+<div class="col bottom-back">
+  <a href="index.html" class="back-to-poster">← На плакат</a>
+</div>
+
+<div class="finish-ov" id="finOv">
+  <div class="finish-card">
+    <div class="finish-score" id="finScore"></div>
+    <div class="finish-btns">
+      <a href="index.html" class="finish-btn finish-btn-pri">На плакат</a>
+      <button class="finish-btn finish-btn-sec" onclick="finStay()">Остаться в теме</button>
+    </div>
+  </div>
+</div>
+
+<script src="../shared.js"></script>
+<script>
+  BLOCK_ID = 'math5_block1';
+
+  /* ── Лента времени ── */
+  var TL_ITEMS = [
+    { era: 'Точка 1 — ~3000 до н.э. · Шумер (Месопотамия)',
+      imgId: 'node1_img2',
+      imgDesc: 'Шумерский торговец записывает числа на глиняной табличке заострённой палочкой, рядом мешки зерна',
+      what: 'Числа для счёта товаров — 1, 2, 3… Запись на глиняных табличках заострённой палочкой.',
+      missing: 'Нуля нет. Пустое место просто оставляли пустым — читателю приходилось догадываться самому.',
+      q: 'Число 35 и число 305 — как их различить, если нуля нет?' },
+    { era: 'Точка 2 — ~2000 до н.э. · Древний Египет',
+      imgId: 'node1_img3',
+      imgDesc: 'Египетский писец с папирусом, на котором видны иероглифы-числа, на фоне пирамид',
+      what: 'Числа до миллиона. Для каждого разряда — отдельный иероглиф: лотос для тысячи, верёвка для сотни.',
+      missing: 'Нуля нет. Дроби записывались особыми знаками.',
+      q: 'Что будет, если нужно записать число, для которого ещё нет иероглифа?' },
+    { era: 'Точка 3 — ~500 до н.э. · Древняя Греция',
+      imgId: 'node1_img4',
+      imgDesc: 'Древнегреческий учёный с циркулем у доски с геометрическими фигурами',
+      what: 'Геометрия и доказательства. Числа понимались как длины отрезков.',
+      missing: 'Нуля нет. Греки считали: «ничто» нельзя считать числом — это философская проблема.',
+      q: 'Как бы ты возразил грекам на то, что «ничто» не может быть числом?' },
+    { era: 'Точка 4 — ~200–500 н.э. · Индия',
+      imgId: 'node1_img5',
+      imgDesc: 'Индийский математик пишет цифры 0–9 на пальмовом листе, рядом виден нуль как отдельный знак',
+      what: 'Позиционная запись чисел — как у нас сегодня. И главное: нуль как цифра и как самостоятельное число.',
+      missing: 'Прорыв: теперь можно записать любое число компактно, и каждая цифра знает своё место.',
+      q: 'Нуль придумали в Индии — а почему не в Греции, где математика была развита не хуже?' },
+    { era: 'Точка 5 — ~800 н.э. · Арабский мир → Европа',
+      imgId: 'node1_img6',
+      imgDesc: 'Арабский учёный в библиотеке с рукописью, на странице видны арабские цифры 0–9',
+      what: 'Арабские учёные переняли индийскую систему и распространили её по всему миру. Цифры 0–9 пришли в Европу.',
+      missing: 'Итог: та самая запись чисел, которой ты пользуешься сегодня.',
+      q: 'Арабские цифры вытеснили римские по всему миру. Почему, как думаешь?' }
+  ];
+
+  var tlCurrent = -1;
+  var tlVisited = {};
+
+  function tlTap(idx) {
+    var card = document.getElementById('tlCard');
+    var item = TL_ITEMS[idx];
+    tlVisited[idx] = true;
+    tlAttempted = true;
+    tryMarkDone();
+    var i;
+    for (i = 0; i < TL_ITEMS.length; i++) {
+      var dot = document.getElementById('tlDot' + i);
+      dot.className = 'tl-dot' + (i === idx ? ' active' : (tlVisited[i] ? ' visited' : ''));
+    }
+    if (tlCurrent === idx) {
+      card.className = 'tl-card';
+      document.getElementById('tlDot' + idx).className = 'tl-dot visited';
+      tlCurrent = -1;
+      return;
+    }
+    tlCurrent = idx;
+    var imgHtml = '<div class="tl-card-ph"><div class="tl-card-ph-icon">🏛</div><div class="tl-card-ph-desc">' + item.imgDesc + '</div></div>';
+    var navPrev = idx > 0 ? '<button class="tl-nav-btn" onclick="tlTap(' + (idx - 1) + ')">← Назад</button>' : '<div></div>';
+    var navNext = idx < TL_ITEMS.length - 1
+      ? '<button class="tl-nav-btn pri" onclick="tlTap(' + (idx + 1) + ')">Вперёд →</button>'
+      : '<button class="tl-nav-btn pri" onclick="tlTap(' + idx + ')">Закрыть</button>';
+    card.innerHTML = imgHtml
+      + '<div class="tl-card-body">'
+      + '<div class="tl-card-era">' + item.era + '</div>'
+      + '<div class="tl-card-what">' + item.what + '</div>'
+      + '<div class="tl-card-missing">' + item.missing + '</div>'
+      + '<div class="tl-card-q">Подумай: ' + item.q + '</div>'
+      + '<div class="tl-nav">' + navPrev + navNext + '</div>'
+      + '</div>';
+    card.className = 'tl-card show';
+  }
+
+  /* ── Чек-вопрос ── */
+  var CHECK_OPTS = [
+    { text: 'Люди боялись числа ноль — оно приносило несчастье', correct: false },
+    { text: 'Пустоту долго не считали «настоящим» числом — считать нечего', correct: true },
+    { text: 'Нуль слишком сложно записывать — нужен отдельный знак', correct: false },
+    { text: 'Его открыл один учёный, и информация долго не распространялась', correct: false }
+  ];
+
+  function initCheck() {
+    var wrap = document.getElementById('checkOpts');
+    var items = shuffleArr(CHECK_OPTS);
+    var html = '';
+    var i;
+    for (i = 0; i < items.length; i++) {
+      html += '<button class="check-opt" data-correct="' + items[i].correct + '" onclick="chk(this)">' + items[i].text + '</button>';
+    }
+    wrap.innerHTML = html;
+  }
+
+  function chk(btn) {
+    var correct = btn.getAttribute('data-correct') === 'true';
+    var fb   = document.getElementById('checkFb');
+    var wrap = document.getElementById('checkOpts');
+    var opts = wrap.querySelectorAll('.check-opt');
+    var i;
+    if (correct) {
+      checkAnswered = true;
+      tryMarkDone();
+      for (i = 0; i < opts.length; i++) { opts[i].style.pointerEvents = 'none'; }
+      btn.classList.add('correct');
+      fb.className = 'check-fb ok';
+      fb.textContent = 'Именно так. «Ничто» казалось философской проблемой, а не математической. Индийские математики первыми решились считать пустоту числом — и это изменило всё.';
+    } else {
+      btn.classList.add('wrong');
+      fb.className = 'check-fb err';
+      fb.textContent = 'Подумай иначе. Проблема была не в записи и не в суевериях — а в том, как люди понимали само слово «число».';
+      setTimeout(function() {
+        btn.classList.remove('wrong');
+        fb.className = 'check-fb';
+        fb.textContent = '';
+      }, TIMING.wrongHint);
+    }
+  }
+
+  /* ── Глоссарий ── */
+  var GLOSSARY = [
+    { term: 'Натуральное число', def: 'Число, которым считают предметы — целое и больше нуля.', example: '1, 2, 17, 1000 — натуральные. 0 и 1/2 — нет.' },
+    { term: 'Нуль', def: 'Число, обозначающее отсутствие единиц данного разряда или предметов.', example: 'В числе 305 нуль стоит на месте десятков.' },
+    { term: 'Натуральный ряд', def: 'Все натуральные числа, расположенные по порядку: 1, 2, 3, 4…', example: 'Ряд бесконечен — за числом 1 000 000 идёт 1 000 001.' },
+    { term: 'Цифра', def: 'Знак для записи числа. Всего цифр 10: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9.', example: 'Число 25 записано двумя цифрами: 2 и 5.' },
+    { term: 'Позиционная запись', def: 'Система, где значение цифры зависит от её места (позиции) в числе.', example: 'Цифра 3 в числе 300 — три сотни, в числе 30 — три десятка.' }
+  ];
+
+  /* ── Match ── */
+  var MATCH_PAIRS = [
+    { l: '3 607',     r: 'Нуль на месте десятков: десятков нет', key: 0 },
+    { l: '100',       r: 'Два нуля: нет десятков и нет единиц', key: 1 },
+    { l: '4 008',     r: 'Два нуля: нет сотен и нет десятков', key: 2 },
+    { l: '70',        r: 'Нуль на месте единиц: единиц нет', key: 3 },
+    { l: '5 000 000', r: 'Шесть нулей держат место всех разрядов кроме миллионов', key: 4 }
+  ];
+
+  var matchSel = null;
+  var matchDone = 0;
+
+  function initMatch() {
+    matchSel = null; matchDone = 0;
+    document.getElementById('matchReset').style.display = 'none';
+    document.getElementById('matchScore').innerHTML = '';
+    var pairs  = shuffleArr(MATCH_PAIRS.slice());
+    var rights = shuffleArr(MATCH_PAIRS.slice());
+    var leftEl  = document.getElementById('matchLeft');
+    var rightEl = document.getElementById('matchRight');
+    leftEl.innerHTML = ''; rightEl.innerHTML = '';
+    var i;
+    for (i = 0; i < pairs.length; i++) {
+      (function(p) {
+        var b = document.createElement('button');
+        b.className = 'match-item';
+        b.innerHTML = p.l;
+        b.dataset.key = p.key;
+        b.dataset.side = 'l';
+        b.onclick = function() { matchTap(b); };
+        leftEl.appendChild(b);
+      })(pairs[i]);
+    }
+    for (i = 0; i < rights.length; i++) {
+      (function(p) {
+        var b = document.createElement('button');
+        b.className = 'match-item';
+        b.innerHTML = p.r;
+        b.dataset.key = p.key;
+        b.dataset.side = 'r';
+        b.onclick = function() { matchTap(b); };
+        rightEl.appendChild(b);
+      })(rights[i]);
+    }
+  }
+
+  function matchTap(btn) {
+    if (btn.classList.contains('done') || btn.classList.contains('dis')) return;
+    if (!matchSel) { matchSel = btn; btn.classList.add('sel'); return; }
+    if (matchSel === btn) { matchSel.classList.remove('sel'); matchSel = null; return; }
+    if (matchSel.getAttribute('data-side') === btn.getAttribute('data-side')) {
+      matchSel.classList.remove('sel'); matchSel = btn; btn.classList.add('sel'); return;
+    }
+    matchAttempted = true;
+    tryMarkDone();
+    var a = matchSel, b = btn;
+    var ok = a.getAttribute('data-key') === b.getAttribute('data-key');
+    a.classList.remove('sel');
+    if (ok) {
+      a.classList.add('done'); b.classList.add('done');
+      matchDone++;
+      document.getElementById('matchScore').innerHTML = 'Пар найдено: <span>' + matchDone + '</span> из ' + MATCH_PAIRS.length;
+      if (matchDone === MATCH_PAIRS.length) { document.getElementById('matchReset').style.display = 'block'; }
+    } else {
+      a.classList.add('bad'); b.classList.add('bad');
+      setTimeout(function() { a.classList.remove('bad'); b.classList.remove('bad'); }, TIMING.matchShake);
+    }
+    matchSel = null;
+  }
+
+  /* ── Reading quiz ── */
+  var READ_QS = [
+    { q: 'Сколько знаков нужно для записи числа 1988 римскими цифрами?',
+      opts: [{ text: '4', correct: false }, { text: '8', correct: false }, { text: '13', correct: true }, { text: '19', correct: false }] },
+    { q: 'Что значит «позиционная запись числа»?',
+      opts: [{ text: 'Числа записываются только в столбик', correct: false }, { text: 'Значение цифры зависит от её места в числе', correct: true }, { text: 'Каждое число записывается с нуля', correct: false }, { text: 'Позиция числа в тексте определяет его смысл', correct: false }] },
+    { q: 'Что стало возможным благодаря нулю в позиционной записи?',
+      opts: [{ text: 'Придумали римские цифры', correct: false }, { text: 'Числа стали короче записываться и появились алгоритмы вроде сложения столбиком', correct: true }, { text: 'Математику начали преподавать в школах', correct: false }, { text: 'Появились отрицательные числа', correct: false }] }
+  ];
+
+  function initReadQuiz() {
+    var container = document.getElementById('readQs');
+    container.innerHTML = '';
+    var i;
+    for (i = 0; i < READ_QS.length; i++) {
+      (function(q) {
+        var block = document.createElement('div');
+        var qDiv = document.createElement('div');
+        qDiv.className = 'read-q-t';
+        qDiv.innerHTML = q.q;
+        block.appendChild(qDiv);
+        var optsDiv = document.createElement('div');
+        optsDiv.className = 'read-opts';
+        var shuffled = shuffleArr(q.opts);
+        var k;
+        for (k = 0; k < shuffled.length; k++) {
+          (function(opt) {
+            var btn = document.createElement('button');
+            btn.className = 'read-opt';
+            btn.innerHTML = opt.text;
+            btn.setAttribute('data-correct', opt.correct ? 'true' : 'false');
+            btn.onclick = function() {
+              if (!readAnswered[READ_QS.indexOf(q)]) {
+                readAnswered[READ_QS.indexOf(q)] = true;
+                readCount++;
+                if (readCount >= READ_QS.length) { readAttempted = true; tryMarkDone(); }
+              }
+              var btns = optsDiv.querySelectorAll('.read-opt');
+              var m;
+              for (m = 0; m < btns.length; m++) { btns[m].style.pointerEvents = 'none'; }
+              if (opt.correct) {
+                btn.classList.add('correct');
+              } else {
+                btn.classList.add('wrong');
+                for (m = 0; m < btns.length; m++) {
+                  if (btns[m].getAttribute('data-correct') === 'true') { btns[m].classList.add('correct'); }
+                }
+              }
+            };
+            optsDiv.appendChild(btn);
+          })(shuffled[k]);
+        }
+        block.appendChild(optsDiv);
+        container.appendChild(block);
+      })(READ_QS[i]);
+    }
+  }
+
+  /* ── Misconceptions ── */
+  var MISCONCEPTIONS = [
+    { imgId: 'node1_img7', imgRatio: '3/2', hasImg: false,
+      imgDesc: 'Ребёнок у доски указывает на нуль в ряду 1, 2, 3… с вопросительным видом',
+      label: 'Нуль — это натуральное число?',
+      wrong: '«Нуль — тоже натуральное, ведь мы его используем в счёте»',
+      whyWrong: 'Нуль стоит в ряду чисел рядом с натуральными, поэтому кажется, что он «такой же».',
+      correct: 'Натуральные числа начинаются с 1 — это числа для счёта предметов. Нуль появился позже и обозначает отсутствие, а не количество. Поэтому он не входит в натуральный ряд, хотя стоит рядом с ним.',
+      hint: 'Натуральный ряд — с единицы. Нуль — сосед, но не член семьи.' },
+    { imgId: 'node1_img8', imgRatio: '3/2', hasImg: false,
+      imgDesc: 'Два ценника рядом: «цифра» и «число», между ними знак вопроса',
+      label: 'Цифра и число — это одно и то же?',
+      wrong: '«Цифра 5 и число 5 — это одно и то же»',
+      whyWrong: 'Оба слова часто используют как синонимы в повседневной речи, поэтому разница не ощущается.',
+      correct: 'Цифра — это знак записи: 0, 1, 2… 9 — всего 10 цифр. Число — это количество или величина. Число 25 записывается двумя цифрами (2 и 5). Цифр всего 10, а чисел бесконечно много.',
+      hint: 'Цифры — буквы математики, числа — слова.' }
+  ];
+
+  /* ── Запомни ── */
+  var REMEMBER = [
+    'Натуральные числа: 1, 2, 3, 4… — начинаются с 1, бесконечны',
+    'Нуль — не натуральное число, но стоит рядом в ряду чисел',
+    'Цифр всего 10 (0–9), а чисел бесконечно много',
+    'Нуль изобрели в Индии — позже всех остальных цифр',
+    'Без нуля невозможна позиционная запись чисел'
+  ];
+
+  /* ── Проверь себя ── */
+  var SELFCHECK = [
+    'Назови три натуральных числа больше 1000.',
+    'Почему нуль не входит в натуральный ряд?',
+    'Сколько цифр в числе 2 048? Назови их.',
+    'Какое число идёт после 999 в натуральном ряду?'
+  ];
+
+  /* ── Финальный квиз ── */
+  var QUIZ_QS = [
+    { q: 'Какое из этих чисел является натуральным?',
+      opts: ['0', '1/2', '7', '\u22123'], c: 2,
+      explain: 'Натуральные числа — целые числа начиная с 1: 1, 2, 3… Нуль, дроби и отрицательные — не натуральные.' },
+    { q: 'Сколько цифр используется для записи всех чисел?',
+      opts: ['9', '10', '26', '\u0411\u0435\u0441\u043a\u043e\u043d\u0435\u0447\u043d\u043e \u043c\u043d\u043e\u0433\u043e'], c: 1,
+      explain: 'Цифры — это знаки 0, 1, 2, 3, 4, 5, 6, 7, 8, 9. Их ровно 10, и из них складываются все числа.' },
+    { q: 'Почему нуль придумали позже остальных цифр?',
+      opts: ['Люди боялись числа ноль', 'Пустоту долго не считали числом', 'Нуль слишком сложно записывать', 'Его придумал один учёный и скрыл открытие'], c: 1,
+      explain: 'Нуль обозначает отсутствие — а «ничто» долго не казалось достойным отдельного числа. Индийские математики первыми решили эту проблему.' },
+    { q: 'В числе 4 070 цифра 0 стоит на месте сотен. Что это означает?',
+      opts: ['В числе нет сотен', 'Число делится на 10', 'Число очень маленькое', 'Цифра 0 здесь лишняя'], c: 0,
+      explain: 'Нуль в позиционной записи означает, что в этом разряде нет единиц. В числе 4 070 — четыре тысячи, ноль сотен, семь десятков, ноль единиц.' },
+    { q: 'Петя написал пятизначное число, все цифры разные и одна из них — нуль. Какое наименьшее число мог написать Петя?',
+      opts: ['01 234', '10 234', '12 034', '10 000'], c: 1,
+      explain: 'Первая цифра пятизначного числа не может быть нулём — иначе число стало бы четырёхзначным. Наименьшее подходящее: 10 234.' }
+  ];
+
+  /* ── DYK ── */
+  var DYK = [
+    { tag: 'История', title: 'Число, которое боялись писать',
+      teaser: 'Средневековые европейские банкиры были оштрафованы за использование нуля.',
+      hasImg: false, imgId: 'node1_img10',
+      imgDesc: 'Средневековый купец с растерянным видом перед стражником, на заднем плане здание банка',
+      text: '<p>В XIII веке город Флоренция запретил банкирам использовать арабские цифры с нулём — власти опасались, что нуль слишком легко подделать под другую цифру. Банкиры должны были вести расчёты римскими цифрами.</p>'
+          + '<p>Парадокс в том, что именно итальянские купцы того времени познакомили Европу с арабской системой счёта — она была удобнее для торговли. Запрет не остановил нуль: к XV веку он победил окончательно.</p>' },
+    { tag: 'Математика', title: 'Самое большое число с именем',
+      teaser: 'Гугол — это 1 с сотней нулей. Его придумал девятилетний мальчик.',
+      hasImg: false, imgId: 'node1_img11',
+      imgDesc: 'Мальчик лет девяти пишет мелом на доске огромное число с множеством нулей',
+      text: '<p>В 1920 году математик Эдвард Каснер спросил своего девятилетнего племянника Милтона: «Как бы ты назвал число — единица со ста нулями?» Мальчик ответил: «Гугол».</p>'
+          + '<p>Гугол записывается как 10 в степени 100. Это больше, чем количество атомов во всей видимой Вселенной. Компания Google назвала себя в честь этого числа — с ошибкой в написании, которую никто не стал исправлять.</p>' }
+  ];
+
+  /* ── Прогресс узла ── */
+  var checkAnswered  = false;
+  var tlAttempted    = false;
+  var matchAttempted = false;
+  var readAttempted  = false;
+  var quizAttempted  = false;
+  var readAnswered   = {};
+  var readCount      = 0;
+
+  function tryMarkDone() {
+    if (checkAnswered && tlAttempted && matchAttempted && readAttempted && quizAttempted) {
+      Progress.markDone('node1');
+    }
+  }
+
+  function checkAllDone() {
+    quizAttempted = true;
+    tryMarkDone();
+  }
+
+  /* ── Инициализация ── */
+  initCheck();
+  initGlossary();
+  initMatch();
+  initReadQuiz();
+  initMisc();
+  initRemember();
+  initSelfcheck();
+  initQuiz();
+  initDYK();
+
+</script>
+</body>
+</html>
